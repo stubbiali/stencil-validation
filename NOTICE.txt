@@ -1,0 +1,5 @@
+stencil-validation
+Copyright 2024 ETH Zurich
+
+This product includes software developed at
+ETH Zurich (https://ethz.ch/en.html).
