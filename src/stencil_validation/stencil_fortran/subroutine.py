@@ -33,10 +33,11 @@ from stencil_validation.iox import io_file_operator
 from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
 
 if TYPE_CHECKING:
+    from types import FunctionType
     from typing import Any, Literal, Optional
 
     from stencil_validation.config import Config
-    from stencil_validation.descriptors import DescriptorDict
+    from stencil_validation.descriptors import ConcretizedDescriptorDict, DescriptorDict
 
 
 FORTRAN_SUBROUTINE_COLLECTION: dict[str, "MetaFortranSubroutine"] = {}
@@ -85,7 +86,7 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
     @property
     def output_descriptors(self) -> DescriptorDict: ...
 
-    def run(
+    def __call__(
         self,
         config: Config,
         template_var_values: Optional[dict[str, Any]] = None,
@@ -96,18 +97,7 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
     ) -> None:
-        src_file_path, cache_id = render_subroutine_template(
-            self.subroutine_id,
-            self.template_file_path,
-            self.template_var_info,
-            template_var_values or {},
-        )
-        module = compile_subroutine(
-            src_file_path, cache_id, include_dirs=include_dirs, opt_level=opt_level, rebuild=rebuild
-        )
-
-        fn = getattr(module, self.name, None)
-        assert fn is not None
+        fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
 
         in_desc_dict = inject_io_name(self.input_descriptors)
         with io_file_operator(input_file_path, mode="r") as in_file_op:
@@ -117,6 +107,35 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
             with io_file_operator(input_file_path, mode="w") as ow_in_file_op:
                 to_file(in_cdesc_dict, config, ow_in_file_op)
 
+        out_cdesc_dict = self.run(fn, in_cdesc_dict)
+
+        with io_file_operator(output_file_path, mode="w") as out_file_op:
+            to_file(out_cdesc_dict, config, out_file_op)
+
+    def compile(
+        self,
+        template_var_values: dict[str, Any],
+        include_dirs: Optional[list[str]] = None,
+        opt_level: Literal[0, 1, 2, 3] = 3,
+        rebuild: bool = False,
+    ) -> FunctionType:
+        src_file_path, cache_id = render_subroutine_template(
+            self.subroutine_id,
+            self.template_file_path,
+            self.template_var_info,
+            template_var_values or {},
+        )
+        module = compile_subroutine(
+            src_file_path, cache_id, include_dirs=include_dirs, opt_level=opt_level, rebuild=rebuild
+        )
+        fn = getattr(module, self.name, None)
+        if fn is None:
+            raise RuntimeError(f"Subroutine `{self.name}` not defined in `{src_file_path}`.")
+        return fn
+
+    def run(
+        self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict
+    ) -> ConcretizedDescriptorDict:
         in_args = {key: cdesc.value for key, cdesc in in_cdesc_dict.items()}
         out_args = fn(**in_args)
         out_args = [out_args] if isinstance(out_args, np.ndarray) else out_args
@@ -125,12 +144,11 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
             raise RuntimeError(
                 f"Expecting {len(self.output_descriptors)} outputs, but got {len(out_args)}."
             )
-        out_cdesc_dict = {
+
+        return {
             key: ConcretizedDescriptor(desc, value)
             for (key, desc), value in zip(self.output_descriptors.items(), out_args)
         }
-        with io_file_operator(output_file_path, mode="w") as out_file_op:
-            to_file(out_cdesc_dict, config, out_file_op)
 
 
 def get_subroutine(version: str, name: str) -> FortranSubroutine:
