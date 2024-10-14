@@ -36,9 +36,9 @@ classifiers = [
 dependencies = [
     'click',
     'fmodpy',
-    'gt4py[dace]>=1.0.4',
+    'gt4py[dace] @ git+https://github.com/GridTools/gt4py.git@2cd0c91',  # same as ifs_physics_common
     'h5py>=3.0',
-    'ifs_physics_common @ git+https://github.com/stubbiali/ifs-physics-common.git@main',
+    'ifs_physics_common @ git+https://github.com/stubbiali/ifs-physics-common.git@v0.2.0',
     'jinja2',
     'netcdf4',
     'numpy>=1.21,<2.0',
@@ -61,6 +61,7 @@ dev = [
     'mypy',
     'pre-commit',
 ]
+test = ['pytest']
 
 [project.urls]
 Source = 'https://github.com/stubbiali/stencil-validation.git'
