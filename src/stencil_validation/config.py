@@ -19,16 +19,12 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-import os
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.config import GT4PyConfig
 
 if TYPE_CHECKING:
     from typing import Literal
-
-
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 
 @dataclass

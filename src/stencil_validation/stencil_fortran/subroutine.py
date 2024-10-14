@@ -23,7 +23,6 @@ from functools import cached_property
 import numpy as np
 from typing import TYPE_CHECKING
 
-from stencil_validation._fortran.utils import render_subroutine_template, compile_subroutine
 from stencil_validation.descriptors import (
     ConcretizedDescriptor,
     concretize,
@@ -31,6 +30,7 @@ from stencil_validation.descriptors import (
     to_file,
 )
 from stencil_validation.iox import io_file_operator
+from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
 
 if TYPE_CHECKING:
     from typing import Any, Literal, Optional

@@ -25,8 +25,12 @@ import os
 import shutil
 from typing import TYPE_CHECKING
 
-from stencil_validation.__setup__ import VERBOSE
-from stencil_validation._fortran.__setup__ import FMODPY_BUILD_CACHE, FMODPY_CACHE, FMODPY_SRC_CACHE
+from stencil_validation.settings import VERBOSE
+from stencil_validation.stencil_fortran.settings import (
+    FMODPY_BUILD_CACHE,
+    FMODPY_CACHE,
+    FMODPY_SRC_CACHE,
+)
 
 if TYPE_CHECKING:
     from types import ModuleType
