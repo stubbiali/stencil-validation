@@ -17,6 +17,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from stencil_validation.descriptors import Bool, Float, Int
-from stencil_validation._fortran.descriptors import FortranField
-from stencil_validation._fortran.subroutine import FortranSubroutine
+from __future__ import annotations
+from typing import Optional
+
+from stencil_validation.__setup__ import VERBOSE
+
+
+def printx(
+    msg: str, end: Optional[str] = None, flush: bool = False, verbose: bool = VERBOSE
+) -> None:
+    if verbose:
+        print(msg, end=end, flush=flush)

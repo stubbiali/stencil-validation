@@ -17,6 +17,28 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from stencil_validation.descriptors import Bool, Float, Int
-from stencil_validation._fortran.descriptors import FortranField
-from stencil_validation._fortran.subroutine import FortranSubroutine
+from __future__ import annotations
+import numpy as np
+from typing import TYPE_CHECKING
+
+from stencil_validation.descriptors import Field
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from typing import Optional
+
+    from stencil_validation.config import Config
+    from stencil_validation.iox import IOFileOperator
+
+
+class FortranField(Field):
+    def get_random_value(self, config: Config) -> NDArray:
+        value = super().get_random_value(config)
+        return np.asfortranarray(value)
+
+    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+        value = super().get_value_from_file(config, io_file_op)
+        if value is not None:
+            return np.asfortranarray(value)
+        else:
+            return value

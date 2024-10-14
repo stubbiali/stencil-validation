@@ -17,6 +17,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from stencil_validation.descriptors import Bool, Float, Int
-from stencil_validation._fortran.descriptors import FortranField
-from stencil_validation._fortran.subroutine import FortranSubroutine
+from __future__ import annotations
+import os
+
+
+VERBOSE: bool = bool(os.environ.get("STENCIL_VALIDATION_VERBOSE", 0))

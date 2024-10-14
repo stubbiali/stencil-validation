@@ -17,6 +17,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from stencil_validation.descriptors import Bool, Float, Int
-from stencil_validation._fortran.descriptors import FortranField
-from stencil_validation._fortran.subroutine import FortranSubroutine
+from __future__ import annotations
+import os
+
+
+FMODPY_CACHE_ROOT: str = os.environ.get("FMODPY_CACHE_ROOT", "")
+FMODPY_BUILD_CACHE: str = os.path.join(FMODPY_CACHE_ROOT, ".fmodpy_build_cache")
+FMODPY_SRC_CACHE: str = os.path.join(FMODPY_CACHE_ROOT, ".fmodpy_src_cache")
+FMODPY_CACHE: str = os.path.join(FMODPY_CACHE_ROOT, ".fmodpy_cache")

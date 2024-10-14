@@ -17,6 +17,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from stencil_validation.descriptors import Bool, Float, Int
-from stencil_validation._fortran.descriptors import FortranField
-from stencil_validation._fortran.subroutine import FortranSubroutine
+import numpy as np
+from typing import Union
+
+
+BoolType = Union[bool]
+FloatType = Union[np.float32, np.float64]
+IntType = Union[np.int32, np.int64]
