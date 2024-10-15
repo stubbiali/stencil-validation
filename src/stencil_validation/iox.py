@@ -100,7 +100,10 @@ class HDF5Operator(IOFileOperator):
     def __del__(self):
         self.f.close()
 
-    def get(
+    @property
+    def field_names(self) -> tuple[str, ...]:
+        return tuple(self.f.keys())
+
     def get_field(
         self,
         name: str,
