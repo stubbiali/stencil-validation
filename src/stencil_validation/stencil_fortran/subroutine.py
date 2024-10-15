@@ -18,7 +18,6 @@
 # under the License.
 
 from __future__ import annotations
-from abc import abstractmethod
 from dataclasses import dataclass, field
 import numpy as np
 from typing import TYPE_CHECKING
@@ -70,11 +69,9 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
     template_file_path: str = ""
     template_var_info: dict[str, dict[str, Any]] = field(default_factory=dict)
 
-    @abstractmethod
     @property
     def input_descriptors(self) -> DescriptorDict: ...
 
-    @abstractmethod
     @property
     def output_descriptors(self) -> DescriptorDict: ...
 
