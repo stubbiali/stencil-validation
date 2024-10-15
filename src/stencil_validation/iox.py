@@ -114,13 +114,14 @@ class HDF5Operator(IOFileOperator):
         if ds is None:
             return None
         else:
-            dtype = dtype or np.float64
-            out = np.asarray(ds[...]).astype(dtype)
+            out = np.asarray(ds[...])
             if dims is not None:
                 if out.ndim != len(dims):
                     raise RuntimeError(
-                        f"H5 field {repr(name)} has {out.ndim} dimensions instead of {len(dims)}."
+                        f"H5 field `{name}` has {out.ndim} dimensions instead of {len(dims)}."
                     )
+            if dtype is not None:
+                out = out.astype(dtype)
             return out
 
     def set_field(
