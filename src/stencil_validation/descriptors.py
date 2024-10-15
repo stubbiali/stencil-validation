@@ -130,13 +130,13 @@ class Bool(Descriptor):
         return config.gt4py_config.dtypes.bool(np.random.rand() < 0.5)
 
     def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
-        value = io_file_op.get(self.io_name, dtype=config.gt4py_config.dtypes.bool)
+        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.bool)
         return value.item() if value is not None else None
 
     def write_value_to_file(
         self, value: BoolType, config: Config, io_file_op: IOFileOperator
     ) -> None:
-        io_file_op.set(
+        io_file_op.set_field(
             data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.bool
         )
 
@@ -150,13 +150,13 @@ class Int(Descriptor):
         return np.random.randint(low=low, high=high, dtype=config.gt4py_config.dtypes.int)
 
     def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
-        value = io_file_op.get(self.io_name, dtype=config.gt4py_config.dtypes.int)
+        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.int)
         return value.item() if value is not None else None
 
     def write_value_to_file(
         self, value: IntType, config: Config, io_file_op: IOFileOperator
     ) -> None:
-        io_file_op.set(
+        io_file_op.set_field(
             data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.int
         )
 
@@ -173,13 +173,13 @@ class Float(Descriptor):
     def get_value_from_file(
         self, config: Config, io_file_op: IOFileOperator
     ) -> Optional[FloatType]:
-        value = io_file_op.get(self.io_name, dtype=config.gt4py_config.dtypes.float)
+        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.float)
         return value.item() if value is not None else None
 
     def write_value_to_file(
         self, value: FloatType, config: Config, io_file_op: IOFileOperator
     ) -> None:
-        io_file_op.set(
+        io_file_op.set_field(
             data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.float
         )
 
@@ -240,7 +240,7 @@ class Field(Descriptor):
 
     def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
         dtype = self.get_dtype(config)
-        value = io_file_op.get(
+        value = io_file_op.get_field(
             self.io_name, dims=tuple(dim.with_size(config) for dim in self.io_dims), dtype=dtype
         )
         if value is None:
@@ -321,7 +321,9 @@ class Field(Descriptor):
         data = np.flip(data, axis=flip_axes)
         data = np.transpose(data, axes=layout_map)
 
-        io_file_op.set(data, name=self.io_name, dims=io_sized_dims, dtype=self.get_dtype(config))
+        io_file_op.set_field(
+            data, name=self.io_name, dims=io_sized_dims, dtype=self.get_dtype(config)
+        )
 
 
 if TYPE_CHECKING:

@@ -66,7 +66,12 @@ class IOFileOperator(ABC):
         self.f_path = io_file_path
 
     @abstractmethod
-    def get(
+    @property
+    def field_names(self) -> tuple[str, ...]:
+        pass
+
+    @abstractmethod
+    def get_field(
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
@@ -75,7 +80,7 @@ class IOFileOperator(ABC):
         pass
 
     @abstractmethod
-    def set(
+    def set_field(
         self,
         data: NDArray,
         name: str,
@@ -96,6 +101,7 @@ class HDF5Operator(IOFileOperator):
         self.f.close()
 
     def get(
+    def get_field(
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
@@ -114,7 +120,7 @@ class HDF5Operator(IOFileOperator):
                     )
             return out
 
-    def set(
+    def set_field(
         self,
         data: NDArray,
         name: str,
@@ -145,7 +151,11 @@ class NetCDFOperator(IOFileOperator):
         super().__init__(io_file_path)
         self.ds = nc.Dataset(io_file_path, mode=mode)
 
-    def get(
+    @property
+    def field_names(self) -> tuple[str, ...]:
+        return tuple(self.ds.keys())
+
+    def get_field(
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
@@ -153,7 +163,7 @@ class NetCDFOperator(IOFileOperator):
     ) -> Optional[NDArray]:
         pass
 
-    def set(
+    def set_field(
         self,
         data: NDArray,
         name: str,
