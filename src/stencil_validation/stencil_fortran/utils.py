@@ -25,7 +25,7 @@ import os
 import shutil
 from typing import TYPE_CHECKING
 
-from stencil_validation.settings import VERBOSE
+from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_fortran.settings import (
     FMODPY_BUILD_CACHE,
     FMODPY_CACHE,
@@ -92,7 +92,6 @@ def compile_subroutine(
     include_dirs: Optional[list[str]] = None,
     opt_level: Literal[0, 1, 2, 3] = 3,
     rebuild: bool = False,
-    verbose: bool = VERBOSE,
 ) -> ModuleType:
     include_dirs = include_dirs or []
     module = fmodpy.fimport(
@@ -102,7 +101,7 @@ def compile_subroutine(
         output_dir=os.path.join(FMODPY_CACHE, cache_id),
         optimization_level=f"-O{opt_level}",
         rebuild=rebuild,
-        verbose=verbose,
+        verbose=GLOBAL_SETTINGS.verbose,
     )
     shutil.rmtree(FMODPY_BUILD_CACHE, ignore_errors=False)
     return module

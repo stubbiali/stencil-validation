@@ -20,11 +20,9 @@
 from __future__ import annotations
 from typing import Optional
 
-from stencil_validation.settings import VERBOSE
+from stencil_validation.settings import GLOBAL_SETTINGS
 
 
-def printx(
-    msg: str, end: Optional[str] = None, flush: bool = False, verbose: bool = VERBOSE
-) -> None:
-    if verbose:
+def printx(msg: str, end: Optional[str] = None, flush: bool = False) -> None:
+    if GLOBAL_SETTINGS.verbose:
         print(msg, end=end, flush=flush)
