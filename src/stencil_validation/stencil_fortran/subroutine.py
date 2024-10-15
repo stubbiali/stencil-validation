@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+from dataclasses import dataclass, field
 from functools import cached_property
 import numpy as np
 from typing import TYPE_CHECKING
@@ -61,7 +62,10 @@ class MetaFortranSubroutine(type):
         return out
 
 
+@dataclass
 class FortranSubroutine(metaclass=MetaFortranSubroutine):
+    config: Config
+
     version: str = ""
     name: str = ""
     template_file_path: str = ""
@@ -70,6 +74,7 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
     @cached_property
     def subroutine_id(self) -> str:
         return self.version + "_" + self.name
+    template_var_info: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @abstractmethod
     @property
@@ -81,7 +86,6 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
 
     def __call__(
         self,
-        config: Config,
         template_var_values: Optional[dict[str, Any]] = None,
         input_file_path: Optional[str] = None,
         output_file_path: Optional[str] = None,
@@ -91,9 +95,9 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
         rebuild: bool = False,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
-        in_cdesc_dict = self.get_in_args(config, input_file_path, overwrite_input_file)
+        in_cdesc_dict = self.get_in_args(input_file_path, overwrite_input_file)
         out_cdesc_dict = self.run(fn, in_cdesc_dict)
-        self.write_output_to_file(config, output_file_path, out_cdesc_dict)
+        self.write_output_to_file(output_file_path, out_cdesc_dict)
 
     def compile(
         self,
@@ -117,15 +121,15 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
         return fn
 
     def get_in_args(
-        self, config: Config, input_file_path: Optional[str], overwrite_input_file: bool
+        self, input_file_path: Optional[str], overwrite_input_file: bool
     ) -> ConcretizedDescriptorDict:
         in_desc_dict = inject_io_name(self.input_descriptors)
         with io_file_operator(input_file_path, mode="r") as in_file_op:
-            in_cdesc_dict = concretize(in_desc_dict, config, in_file_op)
+            in_cdesc_dict = concretize(in_desc_dict, self.config, in_file_op)
             overwrite_input_file = overwrite_input_file or (in_file_op is None)
         if overwrite_input_file:
             with io_file_operator(input_file_path, mode="w") as ow_in_file_op:
-                to_file(in_cdesc_dict, config, ow_in_file_op)
+                to_file(in_cdesc_dict, self.config, ow_in_file_op)
         return in_cdesc_dict
 
     def run(
@@ -146,14 +150,11 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
         }
 
     def write_output_to_file(
-        self,
-        config: Config,
-        output_file_path: Optional[str],
-        out_cdesc_dict: ConcretizedDescriptorDict,
+        self, output_file_path: Optional[str], out_cdesc_dict: ConcretizedDescriptorDict
     ) -> None:
         with io_file_operator(output_file_path, mode="w") as out_file_op:
-            to_file(out_cdesc_dict, config, out_file_op)
+            to_file(out_cdesc_dict, self.config, out_file_op)
 
 
-def get_subroutine(version: str, name: str) -> FortranSubroutine:
-    return FORTRAN_SUBROUTINE_COLLECTION[get_subroutine_id(version, name)]()
+def get_subroutine(version: str, name: str, config: Config) -> FortranSubroutine:
+    return FORTRAN_SUBROUTINE_COLLECTION[get_subroutine_id(version, name)](config)
