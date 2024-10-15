@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 @dataclass
 class Config:
     grid_shape: dict[str, int] = field(default_factory=lambda: {"I": 1, "IJ": 1, "J": 1, "K": 1})
-    data_shape: dict[str, int] = field(default=dict)
+    data_shape: dict[str, int] = field(default_factory=dict)
     gt4py_config: GT4PyConfig = field(default_factory=lambda: GT4PyConfig(backend="numpy"))
 
     def with_grid_shape(self, nx: int, ny: int, nz: int) -> Config:
