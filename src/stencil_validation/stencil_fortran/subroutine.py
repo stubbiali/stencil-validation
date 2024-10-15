@@ -20,7 +20,6 @@
 from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from functools import cached_property
 import numpy as np
 from typing import TYPE_CHECKING
 
@@ -69,11 +68,6 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
     version: str = ""
     name: str = ""
     template_file_path: str = ""
-    template_var_info: dict[str, dict[str, Any]] = {}
-
-    @cached_property
-    def subroutine_id(self) -> str:
-        return self.version + "_" + self.name
     template_var_info: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @abstractmethod
@@ -107,7 +101,7 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
         rebuild: bool = False,
     ) -> FunctionType:
         src_file_path, cache_id = render_subroutine_template(
-            self.subroutine_id,
+            get_subroutine_id(self.version, self.name),
             self.template_file_path,
             self.template_var_info,
             template_var_values or {},
