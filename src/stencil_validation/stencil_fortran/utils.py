@@ -60,7 +60,7 @@ def render_subroutine_template(
             raise RuntimeError(f"No type specified for template variable `{var_name}`.")
         var_type = var_info["type"]
         if var_name in template_var_values:
-            data[var_name] = var_type(data[var_name])
+            data[var_name] = var_type(template_var_values[var_name])
         elif "default" in var_info:
             data[var_name] = var_type(var_info["default"])
         else:
@@ -89,14 +89,13 @@ def render_subroutine_template(
 def compile_subroutine(
     src_file_path: str,
     cache_id: str,
-    include_dirs: Optional[list[str]] = None,
+    compiler_args: Optional[list[str]] = None,
     opt_level: Literal[0, 1, 2, 3] = 3,
     rebuild: bool = False,
 ) -> ModuleType:
-    include_dirs = include_dirs or []
     module = fmodpy.fimport(
         src_file_path,
-        f_compiler_args=[f"-I{include_dir}" for include_dir in include_dirs],
+        f_compiler_args=compiler_args or [],
         build_dir=os.path.join(FMODPY_BUILD_CACHE, cache_id),
         output_dir=os.path.join(FMODPY_CACHE, cache_id),
         optimization_level=f"-O{opt_level}",
