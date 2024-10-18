@@ -18,7 +18,6 @@
 # under the License.
 
 from __future__ import annotations
-from dataclasses import dataclass, field
 import numpy as np
 from typing import TYPE_CHECKING
 
@@ -43,31 +42,33 @@ FORTRAN_SUBROUTINE_COLLECTION: dict[str, "MetaFortranSubroutine"] = {}
 
 
 def get_subroutine_id(version: str, name: str) -> str:
-    return f"{version}_{name}"
+    return f"{version}_{name}" if version != "" and name != "" else ""
 
 
 class MetaFortranSubroutine(type):
     def __new__(cls, cls_name, bases, dct):
         version = dct.get("version", "")
         name = dct.get("name", "")
-        assert not (version == "" and name == "" and len(bases) > 0)
+        # assert not (version == "" and name == "" and len(bases) > 0)
         subroutine_id = get_subroutine_id(version, name)
         if subroutine_id in FORTRAN_SUBROUTINE_COLLECTION:
             raise KeyError(f"Two Fortran subroutines registered under `{subroutine_id}`.")
         out = super().__new__(cls, cls_name, bases, dct)
-        if subroutine_id != "_":
+        if subroutine_id != "":
             FORTRAN_SUBROUTINE_COLLECTION[subroutine_id] = out
         return out
 
 
-@dataclass
 class FortranSubroutine(metaclass=MetaFortranSubroutine):
-    config: Config
-
     version: str = ""
     name: str = ""
     template_file_path: str = ""
-    template_var_info: dict[str, dict[str, Any]] = field(default_factory=dict)
+    template_var_info: dict[str, dict[str, Any]] = {}
+
+    config: Config
+
+    def __init__(self, config: Config) -> None:
+        self.config = config
 
     @property
     def input_descriptors(self) -> DescriptorDict: ...
@@ -93,7 +94,7 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
     def compile(
         self,
         template_var_values: dict[str, Any],
-        include_dirs: Optional[list[str]] = None,
+        compiler_args: Optional[list[str]] = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
     ) -> FunctionType:
@@ -104,7 +105,11 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
             template_var_values or {},
         )
         module = compile_subroutine(
-            src_file_path, cache_id, include_dirs=include_dirs, opt_level=opt_level, rebuild=rebuild
+            src_file_path,
+            cache_id,
+            compiler_args=compiler_args,
+            opt_level=opt_level,
+            rebuild=rebuild,
         )
         fn = getattr(module, self.name, None)
         if fn is None:
@@ -135,16 +140,18 @@ class FortranSubroutine(metaclass=MetaFortranSubroutine):
                 f"Expecting {len(self.output_descriptors)} outputs, but got {len(out_args)}."
             )
 
+        out_desc_dict = inject_io_name(self.output_descriptors)
         return {
             key: ConcretizedDescriptor(desc, value)
-            for (key, desc), value in zip(self.output_descriptors.items(), out_args)
+            for (key, desc), value in zip(out_desc_dict.items(), out_args)
         }
 
     def write_output_to_file(
         self, output_file_path: Optional[str], out_cdesc_dict: ConcretizedDescriptorDict
     ) -> None:
         with io_file_operator(output_file_path, mode="w") as out_file_op:
-            to_file(out_cdesc_dict, self.config, out_file_op)
+            if out_file_op is not None:
+                to_file(out_cdesc_dict, self.config, out_file_op)
 
 
 def get_subroutine(version: str, name: str, config: Config) -> FortranSubroutine:
