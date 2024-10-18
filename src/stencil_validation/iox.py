@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Sequence
     from numpy.typing import DTypeLike, NDArray
     from typing import Literal, Optional
 
@@ -39,33 +39,9 @@ if TYPE_CHECKING:
 class IOFileOperator(ABC):
     f_path: str
 
-    def __new__(
-        cls, io_file_path: str, mode: Literal["a", "r", "w"], *args, **kwargs
-    ) -> Optional[IOFileOperator]:
-        f_path = os.path.abspath(io_file_path)
-
-        if mode == "r":
-            if not os.path.exists(f_path):
-                printx(f"The file `{f_path}` does not exist.")
-                return None
-        else:
-            parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
-            os.makedirs(parent_dir, exist_ok=True)
-
-        f_ext = os.path.splitext(f_path)[1]
-
-        if f_ext == "h5":
-            return HDF5Operator(f_path, mode)
-        elif f_ext == "nc":
-            return NetCDFOperator(f_path, mode)
-        else:
-            printx(f"The file extension `{f_ext}` is not supported.")
-            return None
-
     def __init__(self, io_file_path: str, *args, **kwargs) -> None:
         self.f_path = io_file_path
 
-    @abstractmethod
     @property
     def field_names(self) -> tuple[str, ...]:
         pass
@@ -180,9 +156,28 @@ class NetCDFOperator(IOFileOperator):
 @contextmanager
 def io_file_operator(
     io_file_path: Optional[str], mode: Literal["a", "r", "w"]
-) -> Iterator[Optional[IOFileOperator]]:
+) -> Optional[IOFileOperator]:
+    f_path = os.path.abspath(io_file_path)
+
+    if mode == "r":
+        if not os.path.exists(f_path):
+            printx(f"The file `{f_path}` does not exist.")
+            return None
+    else:
+        parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
+        os.makedirs(parent_dir, exist_ok=True)
+
+    f_ext = os.path.splitext(f_path)[1][1:]
+
+    if f_ext == "h5":
+        op = HDF5Operator(f_path, mode)
+    elif f_ext == "nc":
+        op = NetCDFOperator(f_path, mode)
+    else:
+        printx(f"The file extension `{f_ext}` is not supported.")
+        op = None
+
     try:
-        op = IOFileOperator(io_file_path, mode) if io_file_path is not None else None
         yield op
     finally:
         if op is not None:
