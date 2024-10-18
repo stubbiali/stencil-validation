@@ -141,14 +141,14 @@ class SizedDim:
             size += 1
         return cls(dim, size)
 
-    def get_index_slice(self) -> Union[int, range]:
+    def get_index_slice(self) -> Union[int, slice]:
         if isinstance(self.dim, Dim):
-            return range(0, self.size)
+            return slice(0, self.size)
         else:
             if self.dim.squeezed:
                 return self.dim.index
             else:
-                return range(self.dim.index, self.dim.index + 1 if self.dim.index != -1 else None)
+                return slice(self.dim.index, self.dim.index + 1 if self.dim.index != -1 else None)
 
 
 if TYPE_CHECKING:
