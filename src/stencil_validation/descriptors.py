@@ -19,14 +19,14 @@
 
 from __future__ import annotations
 from abc import abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, fields
 import numpy as np
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.numpyx import to_numpy
 
 from stencil_validation.dims import ExpandedDim
-from stencil_validation.iox import IOFileOperator
+from stencil_validation.iox import io_file_operator
 from stencil_validation.utils import printx
 from stencil_validation.typingx import BoolType, FloatType, IntType
 
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim, GenericDim, SizedDim
+    from stencil_validation.iox import IOFileOperator
 
 
 @dataclass
@@ -45,7 +46,6 @@ class Descriptor:
     dtype_name: Literal["bool", "float", "int"] = "float"
     io_name: Optional[str] = None
     random_value_range: Optional[tuple[float, float]] = None
-    _value: Optional[Any] = None
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
@@ -53,10 +53,12 @@ class Descriptor:
         return ConcretizedDescriptor.from_config_and_file(self, config, io_file_op)
 
     def with_attrs(self, **kwargs: Any) -> Descriptor:
-        fields = asdict(self)
+        self_fields = fields(self)
+        self_field_names = [f.name for f in self_fields]
+        init_kwargs = {name: getattr(self, name) for name in self_field_names}
         for key, value in kwargs.items():
-            fields[key] = value
-        return self.__class__(**fields)
+            init_kwargs[key] = value
+        return self.__class__(**init_kwargs)
 
     @abstractmethod
     def get_random_value(self, config: Config) -> Any:
@@ -96,11 +98,11 @@ class ConcretizedDescriptor:
                     printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
             if value is None and desc.default_io_file_path is not None:
-                io_file_op = IOFileOperator(desc.default_io_file_path, "r")
-                if io_file_op is not None:
-                    value = desc.get_value_from_file(config, io_file_op)
-                    if value is None:
-                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+                with io_file_operator(desc.default_io_file_path, "r") as io_file_op:
+                    if io_file_op is not None:
+                        value = desc.get_value_from_file(config, io_file_op)
+                        if value is None:
+                            printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
         if value is not None:
             printx(f"  * `io_name` found in `{io_file_op.f_path}`")
@@ -137,7 +139,7 @@ class Bool(Descriptor):
         self, value: BoolType, config: Config, io_file_op: IOFileOperator
     ) -> None:
         io_file_op.set_field(
-            data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.bool
+            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.bool
         )
 
 
@@ -157,7 +159,7 @@ class Int(Descriptor):
         self, value: IntType, config: Config, io_file_op: IOFileOperator
     ) -> None:
         io_file_op.set_field(
-            data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.int
+            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.int
         )
 
 
@@ -180,7 +182,7 @@ class Float(Descriptor):
         self, value: FloatType, config: Config, io_file_op: IOFileOperator
     ) -> None:
         io_file_op.set_field(
-            data=np.array([self._value]), name=self.io_name, dtype=config.gt4py_config.dtypes.float
+            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.float
         )
 
 
@@ -213,7 +215,7 @@ class Field(Descriptor):
         return getattr(config.gt4py_config.dtypes, self.dtype_name)
 
     def get_sized_dims(self, config: Config) -> Iterator[SizedDim]:
-        return (dim.with_size(config) for dim in self.io_dims)
+        return (dim.with_size(config) for dim in self.dims)
 
     def get_shape(self, config: Config) -> tuple[int, ...]:
         return tuple(dim.size for dim in self.get_sized_dims(config))
@@ -228,7 +230,7 @@ class Field(Descriptor):
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
     ) -> ConcretizedDescriptor:
         cdesc = super().concretize(config, io_file_op)
-        assert cdesc.value.shape == self.get_storage_shape
+        assert cdesc.value.shape == self.get_storage_shape(config)
         return cdesc
 
     def get_random_value(self, config: Config) -> NDArray:
@@ -292,7 +294,7 @@ class Field(Descriptor):
     def write_value_to_file(
         self, value: NDArray, config: Config, io_file_op: IOFileOperator
     ) -> None:
-        data = to_numpy(self._value[self.get_storage_index_slices(config)])
+        data = to_numpy(value[self.get_storage_index_slices(config)])
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if dim != ExpandedDim]
         squeeze_axes = tuple(i for i, dim in enumerate(self.io_dims_map) if dim == ExpandedDim)
