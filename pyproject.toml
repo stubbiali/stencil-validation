@@ -63,6 +63,9 @@ dev = [
 ]
 test = ['pytest']
 
+[project.scripts]
+iodiff = 'stencil_validation.validation:compare_io_files'
+
 [project.urls]
 Source = 'https://github.com/stubbiali/stencil-validation.git'
 

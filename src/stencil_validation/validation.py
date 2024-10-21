@@ -18,6 +18,7 @@
 # under the License.
 
 from __future__ import annotations
+import click
 import numpy as np
 from typing import Optional
 import warnings
@@ -29,7 +30,12 @@ ATOL = 1e-12
 RTOL = 1e-10
 
 
-def validate(
+@click.command()
+@click.argument("src_file_path", type=str)
+@click.argument("trg_file_path", type=str)
+@click.option("--atol", type=float, default=None)
+@click.option("--rtol", type=float, default=None)
+def compare_io_files(
     src_file_path: str,
     trg_file_path: str,
     index_slices: Optional[tuple[slice, ...]] = None,
@@ -38,9 +44,14 @@ def validate(
 ) -> None:
     with io_file_operator(src_file_path, mode="r") as src_file_op:
         with io_file_operator(trg_file_path, mode="r") as trg_file_op:
-            print("== Validation: start\n")
+            atol = atol or ATOL
+            rtol = rtol or RTOL
+
+            print("== iodiff: start\n")
             print(f"   - source file: {src_file_op.f_path}")
-            print(f"   - target file: {trg_file_op.f_path}\n")
+            print(f"   - target file: {trg_file_op.f_path}")
+            print(f"   - atol: {atol:.1E}")
+            print(f"   - rtol: {rtol:.1E}\n")
 
             common_keys = sorted(
                 set(src_file_op.field_names).intersection(set(trg_file_op.field_names))
@@ -72,8 +83,6 @@ def validate(
                     rel_diff = abs_diff / np.abs(trg_field)
                 rel_diff_max = np.where(trg_field != 0, rel_diff, 0).max()
 
-                atol = atol or ATOL
-                rtol = rtol or RTOL
                 close = np.abs(src_field - trg_field) <= atol + rtol * np.abs(trg_field)
                 allclose = np.all(close)
 
@@ -91,4 +100,4 @@ def validate(
                     f"({f'{freq_close:.2f}'.zfill(5)} %)\033[00m"
                 )
 
-            print("\n== Validation: end")
+            print("\n== iodiff: end")
