@@ -42,7 +42,6 @@ dependencies = [
     'jinja2',
     'netcdf4',
     'numpy>=1.21,<2.0',
-    'pydantic<2.0',
 ]
 description = 'A Python framework to validate multiple implementations of stencil kernels.'
 keywords = ['fortran', 'python', 'stencils', 'validation']
