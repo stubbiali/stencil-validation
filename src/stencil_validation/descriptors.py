@@ -300,11 +300,9 @@ class Field(Descriptor):
         squeeze_axes = tuple(i for i, dim in enumerate(self.io_dims_map) if dim == ExpandedDim)
         data = np.squeeze(data, axis=squeeze_axes)
 
-        io_sized_dims = [dim.with_size(config) for dim in self.io_dims]
         flip_axes = []
         layout_map = []
-        ds_shape = []
-        ds_index_slices = []
+        ds_dims = []
         for i, dim in enumerate(self.io_dims):
             if dim in io_dims_map_filtered:
                 j = io_dims_map_filtered.index(dim)
@@ -315,17 +313,14 @@ class Field(Descriptor):
                 raise ValueError(f"{dim} not found in `io_dims_map`.")
 
             dim_j = io_dims_map_filtered[j]
-            ds_shape.append(io_sized_dims[i].size)
-            ds_index_slices.append(io_sized_dims[i].get_index_slice())
+            ds_dims.append(dim_j.with_size(config))
             if not dim_j.squeezed:
                 layout_map.append(j)
 
         data = np.flip(data, axis=flip_axes)
         data = np.transpose(data, axes=layout_map)
 
-        io_file_op.set_field(
-            data, name=self.io_name, dims=io_sized_dims, dtype=self.get_dtype(config)
-        )
+        io_file_op.set_field(data, name=self.io_name, dims=ds_dims, dtype=self.get_dtype(config))
 
 
 if TYPE_CHECKING:
