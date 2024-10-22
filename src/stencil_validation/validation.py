@@ -56,6 +56,7 @@ def compare_io_files(
             common_keys = sorted(
                 set(src_file_op.field_names).intersection(set(trg_file_op.field_names))
             )
+            max_key_len = max(len(key) for key in common_keys)
             for key in common_keys:
                 src_field = src_file_op.get_field(key)[
                     index_slices if index_slices is not None else ...
@@ -91,7 +92,7 @@ def compare_io_files(
                 freq_close = np.sum(np.logical_not(close)) / abs_diff.size * 100
 
                 print(
-                    f"   {key:20s}:"
+                    f"   {key:{max_key_len}s}:"
                     f"\033[9{2 if abs_diff_max < atol else 1}m max abs diff = {abs_diff_max:.5E} "
                     f"({f'{freq_atol:.2f}'.zfill(5)} %)\033[00m,"
                     f"\033[9{2 if rel_diff_max < rtol else 1}m max rel diff = {rel_diff_max:.5E} "
