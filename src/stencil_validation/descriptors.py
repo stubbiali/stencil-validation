@@ -224,7 +224,7 @@ class Field(Descriptor):
         return tuple(s + abs(p) for s, p in zip(self.get_shape(config), self.padding))
 
     def get_storage_index_slices(self, config: Config) -> tuple[slice, ...]:
-        return tuple(slice(o, o + s) for o, s in zip(self.origin, self.get_storage_shape(config)))
+        return tuple(slice(o, o + s) for o, s in zip(self.origin, self.get_shape(config)))
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
