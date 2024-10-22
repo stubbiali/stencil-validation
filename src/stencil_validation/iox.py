@@ -159,23 +159,22 @@ def io_file_operator(
 ) -> Optional[IOFileOperator]:
     f_path = os.path.abspath(io_file_path)
 
-    if mode == "r":
-        if not os.path.exists(f_path):
-            printx(f"The file `{f_path}` does not exist.")
-            return None
+    if mode == "r" and not os.path.exists(f_path):
+        printx(f"The file `{f_path}` does not exist.")
+        op = None
     else:
         parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
         os.makedirs(parent_dir, exist_ok=True)
 
-    f_ext = os.path.splitext(f_path)[1][1:]
+        f_ext = os.path.splitext(f_path)[1][1:]
 
-    if f_ext == "h5":
-        op = HDF5Operator(f_path, mode)
-    elif f_ext == "nc":
-        op = NetCDFOperator(f_path, mode)
-    else:
-        printx(f"The file extension `{f_ext}` is not supported.")
-        op = None
+        if f_ext == "h5":
+            op = HDF5Operator(f_path, mode)
+        elif f_ext == "nc":
+            op = NetCDFOperator(f_path, mode)
+        else:
+            printx(f"The file extension `{f_ext}` is not supported.")
+            op = None
 
     try:
         yield op
