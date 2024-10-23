@@ -1,0 +1,11 @@
+MODULE PARKIND1
+  USE iso_c_binding
+
+  {% if precision == 'double' -%}
+  INTEGER, PARAMETER :: JPIM = c_int64_t
+  INTEGER, PARAMETER :: JPRB = c_double
+  {%- else -%}
+  INTEGER, PARAMETER :: JPIM = c_int32_t
+  INTEGER, PARAMETER :: JPRB = c_float
+  {%- endif %}
+END MODULE PARKIND1

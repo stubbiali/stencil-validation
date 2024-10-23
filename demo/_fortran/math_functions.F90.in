@@ -1,0 +1,44 @@
+{% include "parkind1.F90.in" %}
+
+
+SUBROUTINE MATH_FUNCTIONS( &
+ !--- in
+ & A, &
+ & B, &
+ !--- out
+ & C1, &
+ & C2, &
+ & C3, &
+ & C4, &
+ & C5, &
+ & C6, &
+ & C7 )
+
+USE PARKIND1 , ONLY : JPIM, JPRB
+IMPLICIT NONE
+
+REAL(KIND=JPRB), INTENT(IN)  :: A({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(IN)  :: B({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C1({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C2({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C3({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C4({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C5({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C6({{ nlon }}, {{ nlev }})
+REAL(KIND=JPRB), INTENT(OUT) :: C7({{ nlon }}, {{ nlev }})
+
+INTEGER(KIND=JPIM) :: JK, JL
+
+DO JK=1,{{ nlev }}
+  DO JL=1,{{ nlon }}
+    C1(JL,JK) = EXP(A(JL,JK))
+    C2(JL,JK) = SIN(A(JL,JK))
+    C3(JL,JK) = COS(A(JL,JK))
+    C4(JL,JK) = A(JL,JK) ** 0.5
+    C5(JL,JK) = A(JL,JK) ** 1.5
+    C6(JL,JK) = SQRT(A(JL,JK))
+    C7(JL,JK) = (A(JL,JK) * B(JL,JK)) ** 0.17_JPRB
+  ENDDO
+ENDDO
+
+END SUBROUTINE MATH_FUNCTIONS
