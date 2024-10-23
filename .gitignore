@@ -22,8 +22,8 @@
 .DS_Store
 .Python
 .dace.conf
-.fmodpy_build_cache/
 .fmodpy_cache/
+.fmodpy_src_cache/
 .gt_cache/
 .idea
 .mypy_cache/
