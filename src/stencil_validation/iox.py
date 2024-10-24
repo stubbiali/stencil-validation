@@ -188,24 +188,25 @@ class NetCDFOperator(IOFileOperator):
 def io_file_operator(
     io_file_path: Optional[str], mode: Literal["a", "r", "w"]
 ) -> Optional[IOFileOperator]:
-    f_path = os.path.abspath(io_file_path)
+    op = None
 
-    if mode == "r" and not os.path.exists(f_path):
-        printx(f"The file `{f_path}` does not exist.")
-        op = None
-    else:
-        parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
-        os.makedirs(parent_dir, exist_ok=True)
+    if io_file_path is not None:
+        f_path = os.path.abspath(io_file_path)
 
-        f_ext = os.path.splitext(f_path)[1][1:]
-
-        if f_ext == "h5":
-            op = HDF5Operator(f_path, mode)
-        elif f_ext == "nc":
-            op = NetCDFOperator(f_path, mode)
+        if mode == "r" and not os.path.exists(f_path):
+            printx(f"The file `{f_path}` does not exist.")
         else:
-            printx(f"The file extension `{f_ext}` is not supported.")
-            op = None
+            parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
+            os.makedirs(parent_dir, exist_ok=True)
+
+            f_ext = os.path.splitext(f_path)[1][1:]
+
+            if f_ext == "h5":
+                op = HDF5Operator(f_path, mode)
+            elif f_ext == "nc":
+                op = NetCDFOperator(f_path, mode)
+            else:
+                printx(f"The file extension `{f_ext}` is not supported.")
 
     try:
         yield op
