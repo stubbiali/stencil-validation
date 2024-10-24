@@ -26,14 +26,13 @@ import numpy as np
 import os
 from typing import TYPE_CHECKING
 
+from stencil_validation.dims import Dim, SizedDim
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
     from numpy.typing import DTypeLike, NDArray
     from typing import Literal, Optional
-
-    from stencil_validation.dims import SizedDim
 
 
 class IOFileOperator(ABC):
@@ -124,6 +123,9 @@ class HDF5Operator(IOFileOperator):
         self.f[name][tuple(index_slices)] = data
 
 
+Scalar = SizedDim(Dim("Scalar"), size=1)
+
+
 class NetCDFOperator(IOFileOperator):
     ds: nc.Dataset
 
@@ -133,7 +135,7 @@ class NetCDFOperator(IOFileOperator):
 
     @property
     def field_names(self) -> tuple[str, ...]:
-        return tuple(self.ds.keys())
+        return tuple(self.ds.variables)
 
     def get_field(
         self,
@@ -141,7 +143,18 @@ class NetCDFOperator(IOFileOperator):
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
     ) -> Optional[NDArray]:
-        pass
+        if name not in self.ds.variables:
+            return None
+        else:
+            out = np.asarray(self.ds[name])
+            if dims is not None:
+                if out.ndim != len(dims):
+                    raise RuntimeError(
+                        f"H5 field `{name}` has {out.ndim} dimensions instead of {len(dims)}."
+                    )
+            if dtype is not None:
+                out = out.astype(dtype)
+            return out
 
     def set_field(
         self,
@@ -150,7 +163,25 @@ class NetCDFOperator(IOFileOperator):
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
     ) -> None:
-        pass
+        dtype = dtype or data.dtype
+        if dims is None:
+            if data.size != 1:
+                raise RuntimeError(
+                    f"If `dims` is `None`, `data` must be 1-item, but has {data.size} elements."
+                )
+            index_slices = [0]
+            dims = [Scalar]
+        else:
+            index_slices = [dim.get_index_slice() for dim in dims]
+
+        nc_dims = [dim.dim.name for dim in dims]
+        for nc_dim, dim in zip(nc_dims, dims):
+            if nc_dim not in self.ds.dimensions:
+                self.ds.createDimension(nc_dim, dim.size)
+
+        if name not in self.ds.variables:
+            self.ds.createVariable(name, dtype, nc_dims)
+        self.ds[name][tuple(index_slices)] = data
 
 
 @contextmanager
