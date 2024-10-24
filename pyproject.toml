@@ -64,6 +64,8 @@ test = ['pytest']
 
 [project.scripts]
 iodiff = 'stencil_validation.validation:compare_io_files'
+run_fortran = 'stencil_validation.stencil_fortran.run:main'
+run_gt4py = 'stencil_validation.stencil_gt4py.run:main'
 
 [project.urls]
 Source = 'https://github.com/stubbiali/stencil-validation.git'
