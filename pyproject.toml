@@ -36,12 +36,12 @@ classifiers = [
 dependencies = [
     'click',
     'fmodpy',
-    'gt4py[dace] @ git+https://github.com/GridTools/gt4py.git@2cd0c91',  # same as ifs_physics_common
+    'gt4py[dace] @ git+https://github.com/stubbiali/gt4py.git@ecrad',
     'h5py>=3.0',
-    'ifs_physics_common @ git+https://github.com/stubbiali/ifs-physics-common.git@v0.2.0',
+    'ifs_physics_common @ git+https://github.com/stubbiali/ifs-physics-common.git@ecrad',
     'jinja2',
     'netcdf4',
-    'numpy>=1.21,<2.0',
+    'numpy>=1.22,<2.0',
 ]
 description = 'A Python framework to validate multiple implementations of stencil kernels.'
 keywords = ['fortran', 'python', 'stencils', 'validation']

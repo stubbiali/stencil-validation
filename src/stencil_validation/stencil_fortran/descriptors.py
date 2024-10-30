@@ -36,8 +36,8 @@ class FortranField(Field):
         value = super().get_random_value(config)
         return np.asfortranarray(value)
 
-    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
-        value = super().get_value_from_file(config, io_file_op)
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+        value = super().read_value(config, io_file_op)
         if value is not None:
             return np.asfortranarray(value)
         else:
