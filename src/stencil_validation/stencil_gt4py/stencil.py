@@ -108,11 +108,9 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         out_file_path: Optional[str] = None,
         overwrite_in_file: bool = False,
     ) -> None:
-        in_cdesc_dict = self.get_args_from_file(self.in_descriptors, in_file_path)
-        inout_cdesc_dict = self.get_args_from_file(self.inout_descriptors, in_file_path)
-        self.write_args_to_file(
-            {**in_cdesc_dict, **inout_cdesc_dict}, in_file_path, overwrite_in_file
-        )
+        in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
+        inout_cdesc_dict = self.read_args(self.inout_descriptors, in_file_path)
+        self.write_args({**in_cdesc_dict, **inout_cdesc_dict}, in_file_path, overwrite_in_file)
         out_cdesc_dict = concretize(self.out_descriptors, self.config)
         tmp_cdesc_dict = concretize(self.tmp_descriptors, self.config)
         self.process_cdesc_dicts(in_cdesc_dict, inout_cdesc_dict, out_cdesc_dict, tmp_cdesc_dict)
@@ -128,9 +126,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
             validate_args=self.config.gt4py_config.validate_args,
         )
 
-        self.write_args_to_file(
-            {**inout_cdesc_dict, **out_cdesc_dict}, out_file_path, overwrite_file=True
-        )
+        self.write_args({**inout_cdesc_dict, **out_cdesc_dict}, out_file_path, overwrite_file=True)
 
 
 def get_gt4py_stencil(

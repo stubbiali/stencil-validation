@@ -65,11 +65,11 @@ class Descriptor:
         pass
 
     @abstractmethod
-    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[Any]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[Any]:
         pass
 
     @abstractmethod
-    def write_value_to_file(self, value: Any, config: Config, io_file_op: IOFileOperator) -> None:
+    def write_value(self, value: Any, config: Config, io_file_op: IOFileOperator) -> None:
         pass
 
     def __str__(self) -> str:
@@ -93,14 +93,14 @@ class ConcretizedDescriptor:
 
         if desc.io_name is not None:
             if io_file_op is not None:
-                value = desc.get_value_from_file(config, io_file_op)
+                value = desc.read_value(config, io_file_op)
                 if value is None:
                     printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
             if value is None and desc.default_io_file_path is not None:
                 with io_file_operator(desc.default_io_file_path, "r") as io_file_op:
                     if io_file_op is not None:
-                        value = desc.get_value_from_file(config, io_file_op)
+                        value = desc.read_value(config, io_file_op)
                         if value is None:
                             printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
@@ -120,7 +120,7 @@ class ConcretizedDescriptor:
 
     def to_file(self, config: Config, io_file_op: Optional[IOFileOperator] = None) -> None:
         if io_file_op is not None:
-            self.desc.write_value_to_file(self.value, config, io_file_op)
+            self.desc.write_value(self.value, config, io_file_op)
 
 
 @dataclass
@@ -131,13 +131,11 @@ class Bool(Descriptor):
     def get_random_value(self, config: Config) -> BoolType:
         return config.gt4py_config.dtypes.bool(np.random.rand() < 0.5)
 
-    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
         value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.bool)
         return value.item() if value is not None else None
 
-    def write_value_to_file(
-        self, value: BoolType, config: Config, io_file_op: IOFileOperator
-    ) -> None:
+    def write_value(self, value: BoolType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
             data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.bool
         )
@@ -151,13 +149,11 @@ class Int(Descriptor):
         low, high = self.random_value_range or (0, 1)
         return np.random.randint(low=low, high=high, dtype=config.gt4py_config.dtypes.int)
 
-    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
         value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.int)
         return value.item() if value is not None else None
 
-    def write_value_to_file(
-        self, value: IntType, config: Config, io_file_op: IOFileOperator
-    ) -> None:
+    def write_value(self, value: IntType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
             data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.int
         )
@@ -172,15 +168,11 @@ class Float(Descriptor):
         low, high = self.random_value_range or (0, 1)
         return config.gt4py_config.dtypes.float(low + (high - low) * np.random.rand())
 
-    def get_value_from_file(
-        self, config: Config, io_file_op: IOFileOperator
-    ) -> Optional[FloatType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
         value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.float)
         return value.item() if value is not None else None
 
-    def write_value_to_file(
-        self, value: FloatType, config: Config, io_file_op: IOFileOperator
-    ) -> None:
+    def write_value(self, value: FloatType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
             data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.float
         )
@@ -240,7 +232,7 @@ class Field(Descriptor):
             dtype=self.get_dtype(config),
         )
 
-    def get_value_from_file(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
         dtype = self.get_dtype(config)
         value = io_file_op.get_field(
             self.io_name, dims=tuple(dim.with_size(config) for dim in self.io_dims), dtype=dtype
@@ -291,9 +283,7 @@ class Field(Descriptor):
 
         return out
 
-    def write_value_to_file(
-        self, value: NDArray, config: Config, io_file_op: IOFileOperator
-    ) -> None:
+    def write_value(self, value: NDArray, config: Config, io_file_op: IOFileOperator) -> None:
         data = to_numpy(value[self.get_storage_index_slices(config)])
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if dim != ExpandedDim]

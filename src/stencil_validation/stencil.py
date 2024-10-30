@@ -67,7 +67,7 @@ class Stencil:
     def out_descriptors(self) -> DescriptorDict:
         return {}
 
-    def get_args_from_file(
+    def read_args(
         self, desc_dict: DescriptorDict, file_path: Optional[str]
     ) -> ConcretizedDescriptorDict:
         desc_dict = inject_io_name(desc_dict)
@@ -75,7 +75,7 @@ class Stencil:
             cdesc_dict = concretize(desc_dict, self.config, file_op)
         return cdesc_dict
 
-    def write_args_to_file(
+    def write_args(
         self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str], overwrite_file: bool
     ) -> None:
         if not overwrite_file:

@@ -55,10 +55,10 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         rebuild: bool = False,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
-        in_cdesc_dict = self.get_args_from_file(self.in_descriptors, in_file_path)
-        self.write_args_to_file(in_cdesc_dict, in_file_path, overwrite_in_file)
+        in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
+        self.write_args(in_cdesc_dict, in_file_path, overwrite_in_file)
         out_cdesc_dict = self.run(fn, in_cdesc_dict)
-        self.write_args_to_file(out_cdesc_dict, out_file_path, overwrite_file=True)
+        self.write_args(out_cdesc_dict, out_file_path, overwrite_file=True)
 
     def compile(
         self,
