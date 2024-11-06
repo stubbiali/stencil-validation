@@ -21,7 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.config import GT4PyConfig
+from ifs_physics_common.framework.config import GT4PyConfig
 
 if TYPE_CHECKING:
     from typing import Literal

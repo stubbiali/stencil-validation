@@ -21,7 +21,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.stencil import compile_stencil, stencil_collection
+from ifs_physics_common.framework.stencil import compile_stencil, stencil_collection
 from stencil_validation.descriptors import concretize
 
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id
