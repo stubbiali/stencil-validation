@@ -23,7 +23,7 @@ from dataclasses import dataclass, fields
 import numpy as np
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.numpyx import to_numpy
+from ifs_physics_common.utils.numpyx import to_numpy
 
 from stencil_validation.dims import ExpandedDim
 from stencil_validation.iox import io_file_operator
