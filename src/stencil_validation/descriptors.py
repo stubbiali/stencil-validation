@@ -217,9 +217,9 @@ class Field(BaseField):
     io_dims_map: tuple[GenericDim, ...] = ()
 
     def __post_init__(self):
-        # if not otherwise specified, io_dims = dims[::-1]
-        self.io_dims = self.io_dims or self.dims[::-1]
-        self.io_dims_map = self.io_dims_map or self.io_dims[::-1]
+        # if not otherwise specified, io_dims = dims
+        self.io_dims = self.io_dims or self.dims
+        self.io_dims_map = self.io_dims_map or self.io_dims
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if not dim.squeezed]
         assert len(io_dims_map_filtered) == len(self.dims)
