@@ -118,6 +118,15 @@ warn_unused_ignores = true
 module = 'h5py'
 ignore_missing_imports = true
 
+# === pytest
+[tool.pytest.ini_options]
+addopts = ['--import-mode=importlib', '-v']
+console_output_style = 'count'
+filterwarnings = ['ignore::DeprecationWarning']
+pythonpath = ['src']
+testpaths = ['tests']
+
+# === setuptools
 [tool.setuptools]
 platforms = ['Linux', 'Mac']
 
