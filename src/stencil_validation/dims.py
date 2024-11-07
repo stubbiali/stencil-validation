@@ -23,7 +23,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Union
+    from typing import Optional, Union
 
     from stencil_validation.config import Config
 
@@ -42,6 +42,7 @@ class Dim:
     name: str
     offset: float = 0
     direction: Direction = Direction.POSITIVE
+    static_size: Optional[int] = None
 
     # the following attributes ensure better inter-operability with IndexedDim
     index: None = None
@@ -134,7 +135,9 @@ class SizedDim:
     @classmethod
     def from_config(cls, dim: Union[Dim, IndexedDim], config: Config) -> SizedDim:
         inner_dim = dim.dim if isinstance(dim, IndexedDim) else dim
-        size = config.grid_shape.get(inner_dim.name, config.data_shape.get(inner_dim.name, None))
+        size = config.grid_shape.get(
+            inner_dim.name, config.data_shape.get(inner_dim.name, dim.static_size)
+        )
         if size is None:
             raise RuntimeError(f"Size not specified for dim `{inner_dim.name}`.")
         if inner_dim.offset in (-0.5, 0.5):
