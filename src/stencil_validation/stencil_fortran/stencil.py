@@ -21,7 +21,7 @@ from __future__ import annotations
 import numpy as np
 from typing import TYPE_CHECKING
 
-from stencil_validation.descriptors import ConcretizedDescriptor, inject_io_name
+from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id
 from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
 
@@ -97,7 +97,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
                 f"Expecting {len(self.out_descriptors)} outs, but got {len(out_args)}."
             )
 
-        out_desc_dict = inject_io_name(self.out_descriptors)
+        out_desc_dict = self.inject_io_name(self.out_descriptors)
         return {
             key: ConcretizedDescriptor(desc, value)
             for (key, desc), value in zip(out_desc_dict.items(), out_args)

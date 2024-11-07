@@ -20,7 +20,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from stencil_validation.descriptors import concretize, inject_io_name, to_file
+from stencil_validation.descriptors import concretize, to_file
 from stencil_validation.iox import io_file_operator
 
 if TYPE_CHECKING:
@@ -67,10 +67,17 @@ class Stencil:
     def out_descriptors(self) -> DescriptorDict:
         return {}
 
+    @staticmethod
+    def inject_io_name(desc_dict: DescriptorDict) -> DescriptorDict:
+        for key, desc in desc_dict.items():
+            io_name = desc.io_name or key
+            desc_dict[key] = desc.with_attrs(io_name=io_name)
+        return desc_dict
+
     def read_args(
         self, desc_dict: DescriptorDict, file_path: Optional[str]
     ) -> ConcretizedDescriptorDict:
-        desc_dict = inject_io_name(desc_dict)
+        desc_dict = self.inject_io_name(desc_dict)
         with io_file_operator(file_path, mode="r") as file_op:
             cdesc_dict = concretize(desc_dict, self.config, file_op)
         return cdesc_dict

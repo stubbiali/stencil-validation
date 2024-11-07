@@ -375,13 +375,6 @@ if TYPE_CHECKING:
     ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
 
 
-def inject_io_name(desc_dict: DescriptorDict) -> DescriptorDict:
-    for key, desc in desc_dict.items():
-        io_name = desc.io_name or key.upper()
-        desc_dict[key] = desc.with_attrs(io_name=io_name)
-    return desc_dict
-
-
 def concretize(
     desc_dict: DescriptorDict, config: Config, io_file_op: Optional[IOFileOperator] = None
 ) -> ConcretizedDescriptorDict:
