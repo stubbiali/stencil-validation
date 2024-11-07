@@ -22,5 +22,5 @@ from typing import Union
 
 
 BoolType = Union[bool]
-FloatType = Union[np.float32, np.float64]
-IntType = Union[np.int32, np.int64]
+FloatType = Union[float, np.float32, np.float64]
+IntType = Union[int, np.int32, np.int64]
