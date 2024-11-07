@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
-from dataclasses import dataclass, fields
+import dataclasses
 import numpy as np
 from typing import TYPE_CHECKING
 
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from stencil_validation.iox import IOFileOperator
 
 
-@dataclass
+@dataclasses.dataclass
 class Descriptor:
     default_io_file_path: Optional[str] = None
     default_value: Optional[Any] = None
@@ -53,7 +53,7 @@ class Descriptor:
         return ConcretizedDescriptor.from_config_and_file(self, config, io_file_op)
 
     def with_attrs(self, **kwargs: Any) -> Descriptor:
-        self_fields = fields(self)
+        self_fields = dataclasses.fields(self)
         self_field_names = [f.name for f in self_fields]
         init_kwargs = {name: getattr(self, name) for name in self_field_names}
         for key, value in kwargs.items():
@@ -78,7 +78,7 @@ class Descriptor:
         )
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class ConcretizedDescriptor:
     desc: Descriptor
     value: Any
@@ -123,7 +123,7 @@ class ConcretizedDescriptor:
             self.desc.write_value(self.value, config, io_file_op)
 
 
-@dataclass
+@dataclasses.dataclass
 class Bool(Descriptor):
     default_value: Optional[BoolType] = None
     dtype_name: Literal["bool"] = "bool"
@@ -141,6 +141,7 @@ class Bool(Descriptor):
         )
 
 
+@dataclasses.dataclass
 class Int(Descriptor):
     default_value: Optional[IntType] = None
     dtype_name: Literal["int"] = "int"
@@ -159,7 +160,7 @@ class Int(Descriptor):
         )
 
 
-@dataclass
+@dataclasses.dataclass
 class Float(Descriptor):
     default_value: Optional[FloatType] = None
     dtype_name: Literal["float"] = "float"
@@ -178,21 +179,12 @@ class Float(Descriptor):
         )
 
 
-@dataclass
-class Field(Descriptor):
+@dataclasses.dataclass
+class BaseField(Descriptor):
     dims: tuple[Dim, ...] = ()
-    io_dims: Optional[tuple[Dim, ...]] = None
-    io_dims_map: tuple[GenericDim, ...] = ()
     padding: tuple[int, ...] = ()
 
     def __post_init__(self):
-        # if not otherwise specified, io_dims = dims[::-1]
-        self.io_dims = self.io_dims or self.dims[::-1]
-        self.io_dims_map = self.io_dims_map or self.io_dims[::-1]
-
-        io_dims_map_filtered = [dim for dim in self.io_dims_map if not dim.squeezed]
-        assert len(io_dims_map_filtered) == len(self.dims)
-
         self.padding = self.padding or (0,) * len(self.dims)
 
     @property
@@ -217,6 +209,22 @@ class Field(Descriptor):
 
     def get_storage_index_slices(self, config: Config) -> tuple[slice, ...]:
         return tuple(slice(o, o + s) for o, s in zip(self.origin, self.get_shape(config)))
+
+
+@dataclasses.dataclass
+class Field(BaseField):
+    io_dims: Optional[tuple[Dim, ...]] = None
+    io_dims_map: tuple[GenericDim, ...] = ()
+
+    def __post_init__(self):
+        # if not otherwise specified, io_dims = dims[::-1]
+        self.io_dims = self.io_dims or self.dims[::-1]
+        self.io_dims_map = self.io_dims_map or self.io_dims[::-1]
+
+        io_dims_map_filtered = [dim for dim in self.io_dims_map if not dim.squeezed]
+        assert len(io_dims_map_filtered) == len(self.dims)
+
+        super().__post_init__()
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
