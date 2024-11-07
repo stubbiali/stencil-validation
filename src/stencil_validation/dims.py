@@ -79,7 +79,7 @@ class Dim:
         else:
             return False
 
-    def __getitem__(self, index: int) -> IndexedDim:
+    def __getitem__(self, index: Union[int, slice]) -> IndexedDim:
         return IndexedDim(self, index)
 
     def __hash__(self) -> int:
@@ -102,26 +102,32 @@ class Dim:
 @dataclass(frozen=True)
 class IndexedDim:
     dim: Dim
-    index: int
-    squeezed: bool = False
+    index: Union[int, slice]
+
+    def __post_init__(self):
+        if isinstance(self.index, slice):
+            assert self.index.step is None
+            if self.index.start is None:
+                assert self.index.stop == 1
+            elif self.index.stop is None:
+                assert self.index.start == -1
+            else:
+                assert self.index.stop - self.index.start == 1
+
+    @property
+    def squeezed(self) -> bool:
+        return isinstance(self.index, int)
 
     def __neg__(self) -> IndexedDim:
-        return IndexedDim(-self.dim, self.index, self.squeezed)
+        return IndexedDim(-self.dim, self.index)
 
     def __eq__(self, other: Union[Dim, IndexedDim]) -> bool:
         if isinstance(other, Dim):
             return self.dim == other
         elif isinstance(other, IndexedDim):
-            return (
-                self.dim == other.dim
-                and self.index == other.index
-                and self.squeezed == other.squeezed
-            )
+            return self.dim == other.dim and self.index == other.index
         else:
             return False
-
-    def squeeze(self) -> IndexedDim:
-        return IndexedDim(self.dim, self.index, squeezed=True)
 
     def with_size(self, config: Config) -> SizedDim:
         return SizedDim.from_config(self, config)
@@ -136,7 +142,7 @@ class SizedDim:
     def from_config(cls, dim: Union[Dim, IndexedDim], config: Config) -> SizedDim:
         inner_dim = dim.dim if isinstance(dim, IndexedDim) else dim
         size = config.grid_shape.get(
-            inner_dim.name, config.data_shape.get(inner_dim.name, dim.static_size)
+            inner_dim.name, config.data_shape.get(inner_dim.name, inner_dim.static_size)
         )
         if size is None:
             raise RuntimeError(f"Size not specified for dim `{inner_dim.name}`.")
@@ -145,13 +151,7 @@ class SizedDim:
         return cls(dim, size)
 
     def get_index_slice(self) -> Union[int, slice]:
-        if isinstance(self.dim, Dim):
-            return slice(0, self.size)
-        else:
-            if self.dim.squeezed:
-                return self.dim.index
-            else:
-                return slice(self.dim.index, self.dim.index + 1 if self.dim.index != -1 else None)
+        return slice(0, self.size) if isinstance(self.dim, Dim) else self.dim.index
 
 
 if TYPE_CHECKING:

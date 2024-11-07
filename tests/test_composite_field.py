@@ -98,8 +98,7 @@ def test(field_cls: type[Field], composite_field_cls: type[CompositeField]):
             to_file(cdesc_dict, config, io_file_op)
 
         composite_field = composite_field_cls(
-            dims=(IJ, K, D2),
-            fields_map={(IJ, K, D2[0].squeeze()): field0, (IJ, K, D2[1].squeeze()): field1},
+            dims=(IJ, K, D2), fields_map={(IJ, K, D2[0]): field0, (IJ, K, D2[1]): field1}
         )
         with io_file_operator(file_path, mode="r") as io_file_op:
             composite_value = composite_field.concretize(config, io_file_op).value
