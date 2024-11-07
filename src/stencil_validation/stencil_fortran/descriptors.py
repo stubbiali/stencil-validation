@@ -21,7 +21,7 @@ from __future__ import annotations
 import numpy as np
 from typing import TYPE_CHECKING
 
-from stencil_validation.descriptors import Field
+from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -42,3 +42,16 @@ class FortranField(Field):
             return np.asfortranarray(value)
         else:
             return value
+
+
+class CompositeFortranField(CompositeField):
+    def __post_init__(self) -> None:
+        for field in self.fields_map.values():
+            assert isinstance(field, FortranField)
+        super().__post_init__()
+
+    def concretize(
+        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+    ) -> ConcretizedDescriptor:
+        value = super().concretize(config, io_file_op).value
+        return ConcretizedDescriptor(self, np.asfortranarray(value))

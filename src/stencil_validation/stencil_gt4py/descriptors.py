@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 from gt4py.storage import from_array
 
-from stencil_validation.descriptors import Field
+from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -45,3 +45,19 @@ class GT4PyField(Field):
             )
         else:
             return value
+
+
+class CompositeGT4PyField(CompositeField):
+    def __post_init__(self) -> None:
+        for field in self.fields_map.values():
+            assert isinstance(field, GT4PyField)
+        super().__post_init__()
+
+    def concretize(
+        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+    ) -> ConcretizedDescriptor:
+        value = super().concretize(config, io_file_op).value
+        return ConcretizedDescriptor(
+            self,
+            from_array(value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend),
+        )

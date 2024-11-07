@@ -321,6 +321,55 @@ class Field(BaseField):
         io_file_op.set_field(data, name=self.io_name, dims=ds_dims, dtype=self.get_dtype(config))
 
 
+@dataclasses.dataclass
+class CompositeField(BaseField):
+    fields_map: dict[tuple[GenericDim, ...], Field] = dataclasses.field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        dtype_names = set()
+        for dims, field in self.fields_map.items():
+            assert len(dims) == len(self.dims)
+
+            dtype_names.add(field.dtype_name)
+            assert len(dtype_names) == 1
+
+            # ensure field has no padding
+            self.fields_map[dims] = field.with_attrs(padding=None)
+
+        self.dtype_name = dtype_names.pop()
+
+        super().__post_init__()
+
+    def concretize(
+        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+    ) -> ConcretizedDescriptor:
+        value = np.zeros(self.get_storage_shape(config), dtype=self.get_dtype(config))
+        value_without_padding = value[self.get_storage_index_slices(config)]
+
+        for dims, field in self.fields_map.items():
+            rhs = field.concretize(config, io_file_op).value
+            index_slices = tuple(dim.with_size(config).get_index_slice() for dim in dims)
+            value_without_padding[index_slices] = to_numpy(rhs)
+
+        return ConcretizedDescriptor(self, value)
+
+    def get_random_value(self, config: Config) -> NDArray:
+        raise NotImplementedError(
+            "The method `get_random_value` of `CompositeField` should never be called."
+        )
+
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+        raise NotImplementedError(
+            "The method `read_value` of `CompositeField` should never be called."
+        )
+
+    def write_value(self, value: NDArray, config: Config, io_file_op: IOFileOperator) -> None:
+        value_without_padding = value[self.get_storage_index_slices(config)]
+        for dims, field in self.fields_map.items():
+            index_slices = tuple(dim.with_size(config).get_index_slice() for dim in dims)
+            field.write_value(value_without_padding[index_slices], config, io_file_op)
+
+
 if TYPE_CHECKING:
     DescriptorDict = dict[str, Descriptor]
     ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
