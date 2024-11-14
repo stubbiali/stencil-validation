@@ -95,8 +95,12 @@ class Dim:
         else:
             return f"-{self.name}" if self.direction == Direction.NEGATIVE else f"{self.name}"
 
-    def with_size(self, config: Config) -> SizedDim:
-        return SizedDim.from_config(self, config)
+    def with_size(self, config: Optional[Config] = None) -> SizedDim:
+        if config is None:
+            assert self.static_size is not None
+            return SizedDim(self, self.static_size)
+        else:
+            return SizedDim.from_config(self, config)
 
 
 @dataclass(frozen=True)

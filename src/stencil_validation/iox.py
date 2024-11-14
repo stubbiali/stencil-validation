@@ -123,7 +123,7 @@ class HDF5Operator(IOFileOperator):
         self.f[name][tuple(index_slices)] = data
 
 
-Scalar = SizedDim(Dim("Scalar"), size=1)
+Scalar = Dim("scalar", static_size=1).with_size()
 
 
 class NetCDFOperator(IOFileOperator):
