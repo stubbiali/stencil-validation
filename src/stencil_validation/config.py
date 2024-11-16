@@ -32,6 +32,7 @@ class Config:
     grid_shape: dict[str, int] = field(default_factory=lambda: {"I": 1, "IJ": 1, "J": 1, "K": 1})
     data_shape: dict[str, int] = field(default_factory=dict)
     gt4py_config: GT4PyConfig = field(default_factory=lambda: GT4PyConfig(backend="numpy"))
+    precision: Literal["double", "single"] = "double"
 
     def with_grid_shape(self, nx: int, ny: int, nz: int) -> Config:
         self.grid_shape["I"] = self.grid_shape["IJ"] = nx
@@ -44,5 +45,6 @@ class Config:
         return self
 
     def with_precision(self, precision: Literal["double", "single"]) -> Config:
+        self.precision = precision
         self.gt4py_config.dtypes = self.gt4py_config.dtypes.with_precision(precision)
         return self
