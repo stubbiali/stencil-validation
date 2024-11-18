@@ -41,7 +41,7 @@ def run(
     write_in_file_path: Optional[str],
     out_file_path: Optional[str],
     data: dict,
-    opt_level: int,
+    opt_level: Literal[0, 1, 2, 3],
     verbose: bool,
 ) -> None:
     GLOBAL_SETTINGS.with_verbosity(verbose)
@@ -96,12 +96,12 @@ def main(
         version,
         grid_shape=(nx, ny, nz),
         data_shape=dict(data_shape),
-        precision=precision,
+        precision=precision,  # type: ignore[arg-type]
         imports=imports,
         in_file_path=input_file,
         write_in_file_path=write_input_file,
         out_file_path=output_file,
         data=dict(data),
-        opt_level=opt_level,
+        opt_level=opt_level,  # type: ignore[arg-type]
         verbose=verbose,
     )

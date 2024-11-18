@@ -37,7 +37,7 @@ FORTRAN_STENCIL_COLLECTION: dict[str, "MetaFortranStencil"] = {}
 
 
 class MetaFortranStencil(MetaStencil):
-    COLLECTION: dict[str, MetaFortranStencil] = FORTRAN_STENCIL_COLLECTION
+    COLLECTION: dict[str, MetaFortranStencil] = FORTRAN_STENCIL_COLLECTION  # type: ignore[assignment]
 
 
 class FortranStencil(Stencil, metaclass=MetaFortranStencil):
@@ -83,7 +83,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         fn = getattr(module, self.name, None)
         if fn is None:
             raise RuntimeError(f"Subroutine `{self.name}` not defined in `{src_file_path}`.")
-        return fn
+        return fn  # type: ignore[no-any-return]
 
     def run(
         self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict
@@ -105,4 +105,4 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
 
 def get_fortran_stencil(name: str, version: str, config: Config) -> FortranStencil:
-    return FORTRAN_STENCIL_COLLECTION[get_stencil_id(name, version)](config)
+    return FORTRAN_STENCIL_COLLECTION[get_stencil_id(name, version)](config)  # type: ignore[no-any-return]

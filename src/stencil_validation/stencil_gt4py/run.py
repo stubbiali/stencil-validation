@@ -102,7 +102,7 @@ def main(
         version,
         grid_shape=(nx, ny, nz),
         data_shape=dict(data_shape),
-        precision=precision,
+        precision=precision,  # type: ignore[arg-type]
         imports=imports,
         in_file_path=input_file,
         write_in_file_path=write_input_file,

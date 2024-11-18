@@ -23,7 +23,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Optional, Union
+    from typing import Any, Optional, Union
 
     from stencil_validation.config import Config
 
@@ -48,7 +48,7 @@ class Dim:
     index: None = None
     squeezed: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         assert self.offset in (-0.5, 0, 0.5)
         assert self.index is None
         assert not self.squeezed
@@ -67,7 +67,7 @@ class Dim:
     def __neg__(self) -> Dim:
         return Dim(self.name, self.offset, flip(self.direction))
 
-    def __eq__(self, other: GenericDim) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Dim):
             return (
                 self.name == other.name
@@ -108,7 +108,7 @@ class IndexedDim:
     dim: Dim
     index: Union[int, slice]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.index, slice):
             assert self.index.step is None
             if self.index.start is None:
@@ -119,13 +119,17 @@ class IndexedDim:
                 assert self.index.stop - self.index.start == 1
 
     @property
+    def name(self) -> str:
+        return self.dim.name
+
+    @property
     def squeezed(self) -> bool:
         return isinstance(self.index, int)
 
     def __neg__(self) -> IndexedDim:
         return IndexedDim(-self.dim, self.index)
 
-    def __eq__(self, other: Union[Dim, IndexedDim]) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Dim):
             return self.dim == other
         elif isinstance(other, IndexedDim):

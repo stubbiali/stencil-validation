@@ -93,7 +93,7 @@ def compile_subroutine(
     opt_level: Literal[0, 1, 2, 3] = 3,
     rebuild: bool = False,
 ) -> ModuleType:
-    module = fmodpy.fimport(
+    module: ModuleType = fmodpy.fimport(
         src_file_path,
         f_compiler_args=compiler_args or [],
         build_dir=os.path.join(FMODPY_BUILD_CACHE, cache_id),

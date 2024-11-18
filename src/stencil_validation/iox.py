@@ -30,20 +30,20 @@ from stencil_validation.dims import Dim, SizedDim
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterator, Sequence
     from numpy.typing import DTypeLike, NDArray
-    from typing import Literal, Optional
+    from typing import Any, Literal, Optional
 
 
 class IOFileOperator(ABC):
     f_path: str
 
-    def __init__(self, io_file_path: str, *args, **kwargs) -> None:
+    def __init__(self, io_file_path: str, *args: Any, **kwargs: Any) -> None:
         self.f_path = io_file_path
 
     @property
     def field_names(self) -> tuple[str, ...]:
-        pass
+        return ()
 
     @abstractmethod
     def get_field(
@@ -72,7 +72,7 @@ class HDF5Operator(IOFileOperator):
         super().__init__(io_file_path)
         self.f = h5.File(io_file_path, mode=mode)
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.f.close()
 
     @property
@@ -116,7 +116,7 @@ class HDF5Operator(IOFileOperator):
             index_slices = [0]
         else:
             shape = [dim.size for dim in dims]
-            index_slices = [dim.get_index_slice() for dim in dims]
+            index_slices = [dim.get_index_slice() for dim in dims]  # type: ignore[misc]
 
         if name not in self.f:
             self.f.create_dataset(name=name, shape=shape, dtype=dtype)
@@ -172,7 +172,7 @@ class NetCDFOperator(IOFileOperator):
             index_slices = [0]
             dims = [Scalar]
         else:
-            index_slices = [dim.get_index_slice() for dim in dims]
+            index_slices = [dim.get_index_slice() for dim in dims]  # type: ignore[misc]
 
         nc_dims = [dim.dim.name for dim in dims]
         for nc_dim, dim in zip(nc_dims, dims):
@@ -180,15 +180,15 @@ class NetCDFOperator(IOFileOperator):
                 self.ds.createDimension(nc_dim, dim.size)
 
         if name not in self.ds.variables:
-            self.ds.createVariable(name, dtype, nc_dims)
+            self.ds.createVariable(name, dtype, nc_dims)  # type: ignore[arg-type]
         self.ds[name][tuple(index_slices)] = data
 
 
 @contextmanager
 def io_file_operator(
     io_file_path: Optional[str], mode: Literal["a", "r", "w"]
-) -> Optional[IOFileOperator]:
-    op = None
+) -> Iterator[Optional[IOFileOperator]]:
+    op: Optional[IOFileOperator] = None
 
     if io_file_path is not None:
         f_path = os.path.abspath(io_file_path)

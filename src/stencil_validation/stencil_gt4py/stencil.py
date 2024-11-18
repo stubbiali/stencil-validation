@@ -40,7 +40,7 @@ GT4PY_STENCIL_COLLECTION: dict[str, "MetaGT4PyStencil"] = {}
 
 
 class MetaGT4PyStencil(MetaStencil):
-    COLLECTION: dict[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION
+    COLLECTION: dict[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION  # type: ignore[assignment]
 
 
 class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
@@ -132,4 +132,4 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 def get_gt4py_stencil(
     name: str, version: str, config: Config, externals: Optional[dict] = None
 ) -> GT4PyStencil:
-    return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)
+    return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]

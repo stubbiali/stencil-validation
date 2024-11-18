@@ -35,9 +35,9 @@ def get_stencil_id(name: str, version: str) -> str:
 
 
 class MetaStencil(type):
-    COLLECTION: Optional[dict, MetaStencil] = None
+    COLLECTION: dict[str, type]
 
-    def __new__(cls, cls_name, bases, dct):
+    def __new__(cls, cls_name: str, bases: tuple[type, ...], dct: dict) -> type:
         name = dct.get("name", "")
         version = dct.get("version", "")
         stencil_id = get_stencil_id(name, version)

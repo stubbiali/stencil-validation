@@ -45,7 +45,7 @@ class Descriptor:
     default_value: Optional[Any] = None
     dtype_name: Literal["bool", "float", "int"] = "float"
     io_name: Optional[str] = None
-    random_value_range: Optional[tuple[float, float]] = None
+    random_value_range: Optional[tuple[Any, Any]] = None
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
@@ -86,7 +86,7 @@ class ConcretizedDescriptor:
     @classmethod
     def from_config_and_file(
         cls, desc: Descriptor, config: Config, io_file_op: Optional[IOFileOperator] = None
-    ):
+    ) -> ConcretizedDescriptor:
         printx(f"Concretization of {desc}:")
 
         value = None
@@ -105,7 +105,7 @@ class ConcretizedDescriptor:
                             printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
         if value is not None:
-            printx(f"  * `io_name` found in `{io_file_op.f_path}`")
+            printx(f"  * `io_name` found in `{io_file_op.f_path}`")  # type: ignore[union-attr]
         else:
             if desc.default_value is not None:
                 value = desc.default_value
@@ -129,15 +129,21 @@ class Bool(Descriptor):
     dtype_name: Literal["bool"] = "bool"
 
     def get_random_value(self, config: Config) -> BoolType:
-        return config.gt4py_config.dtypes.bool(np.random.rand() < 0.5)
+        return config.gt4py_config.dtypes.bool(  # type: ignore[no-any-return]
+            np.random.rand() < 0.5
+        )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
-        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.bool)
+        value = io_file_op.get_field(
+            self.io_name, dtype=config.gt4py_config.dtypes.bool  # type: ignore[arg-type]
+        )
         return value.item() if value is not None else None
 
     def write_value(self, value: BoolType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
-            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.bool
+            data=np.array([value]),
+            name=self.io_name,  # type: ignore[arg-type]
+            dtype=config.gt4py_config.dtypes.bool,
         )
 
 
@@ -145,18 +151,25 @@ class Bool(Descriptor):
 class Int(Descriptor):
     default_value: Optional[IntType] = None
     dtype_name: Literal["int"] = "int"
+    random_value_range: Optional[tuple[IntType, IntType]] = None
 
-    def get_random_value(self, config) -> IntType:
+    def get_random_value(self, config: Config) -> IntType:
         low, high = self.random_value_range or (0, 1)
-        return np.random.randint(low=low, high=high, dtype=config.gt4py_config.dtypes.int)
+        return np.random.randint(  # type: ignore[return-value]
+            low=low, high=high, dtype=config.gt4py_config.dtypes.int
+        )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
-        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.int)
+        value = io_file_op.get_field(
+            self.io_name, dtype=config.gt4py_config.dtypes.int  # type: ignore[arg-type]
+        )
         return value.item() if value is not None else None
 
     def write_value(self, value: IntType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
-            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.int
+            data=np.array([value]),
+            name=self.io_name,  # type: ignore[arg-type]
+            dtype=config.gt4py_config.dtypes.int,
         )
 
 
@@ -164,18 +177,25 @@ class Int(Descriptor):
 class Float(Descriptor):
     default_value: Optional[FloatType] = None
     dtype_name: Literal["float"] = "float"
+    random_value_range: Optional[tuple[FloatType, FloatType]] = None
 
     def get_random_value(self, config: Config) -> FloatType:
         low, high = self.random_value_range or (0, 1)
-        return config.gt4py_config.dtypes.float(low + (high - low) * np.random.rand())
+        return config.gt4py_config.dtypes.float(  # type: ignore[no-any-return]
+            low + (high - low) * np.random.rand()
+        )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
-        value = io_file_op.get_field(self.io_name, dtype=config.gt4py_config.dtypes.float)
+        value = io_file_op.get_field(
+            self.io_name, dtype=config.gt4py_config.dtypes.float  # type: ignore[arg-type]
+        )
         return value.item() if value is not None else None
 
     def write_value(self, value: FloatType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
-            data=np.array([value]), name=self.io_name, dtype=config.gt4py_config.dtypes.float
+            data=np.array([value]),
+            name=self.io_name,  # type: ignore[arg-type]
+            dtype=config.gt4py_config.dtypes.float,
         )
 
 
@@ -184,7 +204,7 @@ class BaseField(Descriptor):
     dims: tuple[Dim, ...] = ()
     padding: tuple[int, ...] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.padding = self.padding or (0,) * len(self.dims)
 
     @property
@@ -196,7 +216,7 @@ class BaseField(Descriptor):
         return tuple(max(-p, 0) for p in self.padding)
 
     def get_dtype(self, config: Config) -> DTypeLike:
-        return getattr(config.gt4py_config.dtypes, self.dtype_name)
+        return getattr(config.gt4py_config.dtypes, self.dtype_name)  # type: ignore[no-any-return]
 
     def get_sized_dims(self, config: Config) -> Iterator[SizedDim]:
         return (dim.with_size(config) for dim in self.dims)
@@ -216,7 +236,7 @@ class Field(BaseField):
     io_dims: Optional[tuple[Dim, ...]] = None
     io_dims_map: tuple[GenericDim, ...] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # if not otherwise specified, io_dims = dims
         self.io_dims = self.io_dims or self.dims
         self.io_dims_map = self.io_dims_map or self.io_dims
@@ -243,7 +263,9 @@ class Field(BaseField):
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
         dtype = self.get_dtype(config)
         value = io_file_op.get_field(
-            self.io_name, dims=tuple(dim.with_size(config) for dim in self.io_dims), dtype=dtype
+            self.io_name,  # type: ignore[arg-type]
+            dims=tuple(dim.with_size(config) for dim in self.io_dims),  # type: ignore[union-attr]
+            dtype=dtype,
         )
         if value is None:
             return None
@@ -256,10 +278,10 @@ class Field(BaseField):
             if dim == ExpandedDim:
                 expand_axes.append(i)
                 j = None
-            elif dim in self.io_dims:
-                j = self.io_dims.index(dim)
-            elif -dim in self.io_dims:
-                j = self.io_dims.index(-dim)
+            elif dim in self.io_dims:  # type: ignore[operator]
+                j = self.io_dims.index(dim)  # type: ignore[union-attr]
+            elif -dim in self.io_dims:  # type: ignore[operator]
+                j = self.io_dims.index(-dim)  # type: ignore[union-attr]
                 flip_axes.append(j)
             else:
                 raise ValueError(f"{dim} not found in `io_dims`.")
@@ -301,7 +323,7 @@ class Field(BaseField):
         flip_axes = []
         layout_map = []
         ds_dims = []
-        for i, dim in enumerate(self.io_dims):
+        for i, dim in enumerate(self.io_dims):  # type: ignore[arg-type]
             if dim in io_dims_map_filtered:
                 j = io_dims_map_filtered.index(dim)
             elif -dim in io_dims_map_filtered:
@@ -318,7 +340,12 @@ class Field(BaseField):
         data = np.flip(data, axis=flip_axes)
         data = np.transpose(data, axes=layout_map)
 
-        io_file_op.set_field(data, name=self.io_name, dims=ds_dims, dtype=self.get_dtype(config))
+        io_file_op.set_field(
+            data,
+            name=self.io_name,  # type: ignore[arg-type]
+            dims=ds_dims,
+            dtype=self.get_dtype(config),
+        )
 
 
 @dataclasses.dataclass
@@ -334,7 +361,7 @@ class CompositeField(BaseField):
             assert len(dtype_names) == 1
 
             # ensure field has no padding
-            self.fields_map[dims] = field.with_attrs(padding=None)
+            self.fields_map[dims] = field.with_attrs(padding=None)  # type: ignore[assignment]
 
         self.dtype_name = dtype_names.pop()
 
