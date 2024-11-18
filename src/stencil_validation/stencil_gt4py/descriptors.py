@@ -46,8 +46,7 @@ class GT4PyField(Field):
         return from_array(value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend)
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
-        value = super().read_value(config, io_file_op)
-        if value is not None:
+        if (value := super().read_value(config, io_file_op)) is not None:
             return from_array(
                 value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend
             )

@@ -338,7 +338,7 @@ class Field(BaseField):
                 j = io_dims_map_filtered.index(-dim)
                 flip_axes.append(j)
             else:
-                raise ValueError(f"{dim} not found in `io_dims_map`.")
+                raise ValueError(f"`{dim}` not found in `io_dims_map`.")
 
             dim_j = io_dims_map_filtered[j]
             ds_dims.append(dim_j.with_size(config))
