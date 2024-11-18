@@ -48,17 +48,17 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         self,
         template_var_values: Optional[dict[str, Any]] = None,
         in_file_path: Optional[str] = None,
+        write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
-        overwrite_in_file: bool = False,
         include_dirs: Optional[list[str]] = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
         in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
-        self.write_args(in_cdesc_dict, in_file_path, overwrite_in_file)
+        self.write_args(in_cdesc_dict, write_in_file_path)
         out_cdesc_dict = self.run(fn, in_cdesc_dict)
-        self.write_args(out_cdesc_dict, out_file_path, overwrite_file=True)
+        self.write_args(out_cdesc_dict, out_file_path)
 
     def compile(
         self,

@@ -82,12 +82,6 @@ class Stencil:
             cdesc_dict = concretize(desc_dict, self.config, file_op)
         return cdesc_dict
 
-    def write_args(
-        self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str], overwrite_file: bool
-    ) -> None:
-        if not overwrite_file:
-            with io_file_operator(file_path, mode="r") as file_op:
-                overwrite_file = file_op is None
-        if overwrite_file:
-            with io_file_operator(file_path, mode="w") as file_op:
-                to_file(cdesc_dict, self.config, file_op)
+    def write_args(self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str]) -> None:
+        with io_file_operator(file_path, mode="w") as file_op:
+            to_file(cdesc_dict, self.config, file_op)

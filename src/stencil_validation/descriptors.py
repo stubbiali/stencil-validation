@@ -385,7 +385,7 @@ def concretize(
 
 
 def to_file(
-    cdesc_dict: ConcretizedDescriptorDict, config: Config, io_file_op: IOFileOperator
+    cdesc_dict: ConcretizedDescriptorDict, config: Config, io_file_op: Optional[IOFileOperator]
 ) -> None:
     for cdesc in cdesc_dict.values():
         cdesc.to_file(config, io_file_op)

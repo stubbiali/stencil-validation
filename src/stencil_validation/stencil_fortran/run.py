@@ -38,7 +38,7 @@ def run(
     precision: Literal["double", "single"],
     imports: tuple[str, ...],
     in_file_path: Optional[str],
-    overwrite_in_file: bool,
+    write_in_file_path: Optional[str],
     out_file_path: Optional[str],
     data: dict,
     opt_level: int,
@@ -56,12 +56,7 @@ def run(
         importlib.import_module(module)
 
     get_fortran_stencil(name, version, config)(
-        data,
-        in_file_path,
-        out_file_path,
-        overwrite_in_file=overwrite_in_file,
-        opt_level=opt_level,
-        rebuild=True,
+        data, in_file_path, write_in_file_path, out_file_path, opt_level=opt_level, rebuild=True
     )
 
 
@@ -74,7 +69,7 @@ def run(
 @click.option("--data-size", "data_shape", type=(str, int), multiple=True)
 @click.option("--precision", type=str, default="double")
 @click.option("--input-file", type=str)
-@click.option("--overwrite-input-file", is_flag=True, default=False)
+@click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("-d", "--data", type=(str, str), multiple=True)
 @click.option("--opt-level", type=int, default=3)
@@ -90,7 +85,7 @@ def main(
     precision: str,
     imports: tuple[str, ...],
     input_file: str,
-    overwrite_input_file: bool,
+    write_input_file: str,
     output_file: str,
     data: tuple[tuple[str, str], ...],
     opt_level: int,
@@ -103,9 +98,9 @@ def main(
         data_shape=dict(data_shape),
         precision=precision,
         imports=imports,
-        input_file=input_file,
-        overwrite_input_file=overwrite_input_file,
-        output_file=output_file,
+        in_file_path=input_file,
+        write_in_file_path=write_input_file,
+        out_file_path=output_file,
         data=dict(data),
         opt_level=opt_level,
         verbose=verbose,

@@ -38,7 +38,7 @@ def run(
     precision: Literal["double", "single"],
     imports: tuple[str, ...],
     in_file_path: Optional[str],
-    overwrite_in_file: bool,
+    write_in_file_path: Optional[str],
     out_file_path: Optional[str],
     externals: dict,
     backend: str,
@@ -60,7 +60,7 @@ def run(
         enable_checks
     )
     get_gt4py_stencil(name, version, config, externals=externals)(
-        in_file_path, out_file_path, overwrite_in_file=overwrite_in_file
+        in_file_path, write_in_file_path, out_file_path
     )
 
 
@@ -74,7 +74,7 @@ def run(
 @click.option("--precision", type=str, default="double")
 @click.option("-i", "--import", "imports", type=str, multiple=True)
 @click.option("--input-file", type=str)
-@click.option("--overwrite-input-file", is_flag=True, default=False)
+@click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("-e", "--external", "externals", type=(str, str), multiple=True)
 @click.option("--backend", type=str, default="numpy")
@@ -90,7 +90,7 @@ def main(
     precision: str,
     imports: tuple[str, ...],
     input_file: str,
-    overwrite_input_file: bool,
+    write_input_file: str,
     output_file: str,
     externals: tuple[tuple[str, str], ...],
     backend: str,
@@ -105,7 +105,7 @@ def main(
         precision=precision,
         imports=imports,
         in_file_path=input_file,
-        overwrite_in_file=overwrite_input_file,
+        write_in_file_path=write_input_file,
         out_file_path=output_file,
         externals=dict(externals),
         backend=backend,
