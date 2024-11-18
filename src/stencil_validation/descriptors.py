@@ -140,10 +140,9 @@ class Bool(Descriptor):
         return value.item() if value is not None else None
 
     def write_value(self, value: BoolType, config: Config, io_file_op: IOFileOperator) -> None:
+        # note(stubbiali): netCDF4 does not support boolean fields
         io_file_op.set_field(
-            data=np.array([value]),
-            name=self.io_name,  # type: ignore[arg-type]
-            dtype=config.gt4py_config.dtypes.bool,
+            data=np.array([int(value)]), name=self.io_name, dtype=int  # type: ignore[arg-type]
         )
 
 
