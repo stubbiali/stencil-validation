@@ -52,6 +52,9 @@ class Descriptor:
     ) -> ConcretizedDescriptor:
         return ConcretizedDescriptor.from_config_and_file(self, config, io_file_op)
 
+    def get_default_value(self, config: Config) -> Any:
+        return self.default_value
+
     def with_attrs(self, **kwargs: Any) -> Descriptor:
         self_fields = dataclasses.fields(self)
         self_field_names = [f.name for f in self_fields]
@@ -93,22 +96,19 @@ class ConcretizedDescriptor:
 
         if desc.io_name is not None:
             if io_file_op is not None:
-                value = desc.read_value(config, io_file_op)
-                if value is None:
+                if (value := desc.read_value(config, io_file_op)) is None:
                     printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
             if value is None and desc.default_io_file_path is not None:
                 with io_file_operator(desc.default_io_file_path, "r") as io_file_op:
                     if io_file_op is not None:
-                        value = desc.read_value(config, io_file_op)
-                        if value is None:
+                        if (value := desc.read_value(config, io_file_op)) is None:
                             printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
         if value is not None:
             printx(f"  * `io_name` found in `{io_file_op.f_path}`")  # type: ignore[union-attr]
         else:
-            if desc.default_value is not None:
-                value = desc.default_value
+            if (value := desc.get_default_value(config)) is not None:
                 printx("  * use default value")
             else:
                 value = desc.get_random_value(config)
@@ -253,6 +253,14 @@ class Field(BaseField):
         assert cdesc.value.shape == self.get_storage_shape(config)
         return cdesc
 
+    def get_default_value(self, config: Config) -> Optional[NDArray]:
+        if self.default_value is not None:
+            return np.full(
+                self.get_storage_shape(config), self.default_value, dtype=self.get_dtype(config)
+            )
+        else:
+            return None
+
     def get_random_value(self, config: Config) -> NDArray:
         low, high = self.random_value_range or (0, 1)
         return np.asarray(
@@ -323,7 +331,7 @@ class Field(BaseField):
         flip_axes = []
         layout_map = []
         ds_dims = []
-        for i, dim in enumerate(self.io_dims):  # type: ignore[arg-type]
+        for i, dim in enumerate(self.dims):
             if dim in io_dims_map_filtered:
                 j = io_dims_map_filtered.index(dim)
             elif -dim in io_dims_map_filtered:
