@@ -33,6 +33,14 @@ if TYPE_CHECKING:
 
 
 class GT4PyField(Field):
+    def get_default_value(self, config: Config) -> Optional[NDArray]:
+        if (value := super().get_default_value(config)) is not None:
+            return from_array(
+                value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend
+            )
+        else:
+            return value
+
     def get_random_value(self, config: Config) -> NDArray:
         value = super().get_random_value(config)
         return from_array(value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend)

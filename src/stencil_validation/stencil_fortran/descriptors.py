@@ -32,6 +32,12 @@ if TYPE_CHECKING:
 
 
 class FortranField(Field):
+    def get_default_value(self, config: Config) -> Optional[NDArray]:
+        if (value := super().get_default_value(config)) is not None:
+            return np.asfortranarray(value)
+        else:
+            return value
+
     def get_random_value(self, config: Config) -> NDArray:
         value = super().get_random_value(config)
         return np.asfortranarray(value)
