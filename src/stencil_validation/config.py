@@ -34,6 +34,18 @@ class Config:
     gt4py_config: GT4PyConfig = field(default_factory=lambda: GT4PyConfig(backend="numpy"))
     precision: Literal["double", "single"] = "double"
 
+    @property
+    def nx(self) -> int:
+        return self.grid_shape["I"]
+
+    @property
+    def ny(self) -> int:
+        return self.grid_shape["J"]
+
+    @property
+    def nz(self) -> int:
+        return self.grid_shape["K"]
+
     def with_grid_shape(self, nx: int, ny: int, nz: int) -> Config:
         self.grid_shape["I"] = self.grid_shape["IJ"] = nx
         self.grid_shape["J"] = ny
