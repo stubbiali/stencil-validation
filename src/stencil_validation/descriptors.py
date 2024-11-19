@@ -238,7 +238,10 @@ class Field(BaseField):
     def __post_init__(self) -> None:
         # if not otherwise specified, io_dims = dims
         self.io_dims = self.io_dims or self.dims
-        self.io_dims_map = self.io_dims_map or self.io_dims
+        if not self.io_dims_map:
+            assert all(dim in self.io_dims for dim in self.dims)
+            assert all(io_dim in self.dims for io_dim in self.io_dims)
+            self.io_dims_map = self.dims
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if not dim.squeezed]
         assert len(io_dims_map_filtered) == len(self.dims)
@@ -330,7 +333,7 @@ class Field(BaseField):
         flip_axes = []
         layout_map = []
         ds_dims = []
-        for i, dim in enumerate(self.dims):
+        for i, dim in enumerate(self.io_dims):
             if dim in io_dims_map_filtered:
                 j = io_dims_map_filtered.index(dim)
             elif -dim in io_dims_map_filtered:
