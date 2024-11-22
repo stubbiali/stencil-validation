@@ -407,9 +407,8 @@ class CompositeField(BaseField):
             field.write_value(value_without_padding[index_slices], config, io_file_op)
 
 
-if TYPE_CHECKING:
-    DescriptorDict = dict[str, Descriptor]
-    ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
+DescriptorDict = dict[str, Descriptor]
+ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
 
 
 def concretize(
