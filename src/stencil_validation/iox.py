@@ -174,7 +174,7 @@ class NetCDFOperator(IOFileOperator):
         else:
             index_slices = [dim.get_index_slice() for dim in dims]  # type: ignore[misc]
 
-        nc_dims = [dim.dim.name for dim in dims]
+        nc_dims = [str(dim.dim).replace(" ", "") for dim in dims]
         for nc_dim, dim in zip(nc_dims, dims):
             if nc_dim not in self.ds.dimensions:
                 self.ds.createDimension(nc_dim, dim.size)
