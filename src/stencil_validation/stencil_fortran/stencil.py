@@ -22,7 +22,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 from stencil_validation.descriptors import ConcretizedDescriptor
-from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id
+from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
 from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
 
 if TYPE_CHECKING:
@@ -106,3 +106,6 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
 def get_fortran_stencil(name: str, version: str, config: Config) -> FortranStencil:
     return FORTRAN_STENCIL_COLLECTION[get_stencil_id(name, version)](config)  # type: ignore[no-any-return]
+
+
+print_fortran_stencil_list = lambda: print_stencil_list(FORTRAN_STENCIL_COLLECTION)

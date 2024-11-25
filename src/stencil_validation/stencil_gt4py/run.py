@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 
 from stencil_validation.config import Config
 from stencil_validation.settings import GLOBAL_SETTINGS
-from stencil_validation.stencil_gt4py.stencil import get_gt4py_stencil
+from stencil_validation.stencil_gt4py.stencil import get_gt4py_stencil, print_gt4py_stencil_list
 
 if TYPE_CHECKING:
     from typing import Literal, Optional
@@ -44,6 +44,7 @@ def run(
     backend: str,
     enable_checks: bool,
     verbose: bool,
+    print_stencil_list: bool,
 ) -> None:
     GLOBAL_SETTINGS.with_verbosity(verbose)
     config = (
@@ -56,12 +57,15 @@ def run(
     for module in imports:
         importlib.import_module(module)
 
-    config.gt4py_config = config.gt4py_config.with_backend(backend).with_validate_args(
-        enable_checks
-    )
-    get_gt4py_stencil(name, version, config, externals=externals)(
-        in_file_path, write_in_file_path, out_file_path
-    )
+    if print_stencil_list:
+        print_gt4py_stencil_list()
+    else:
+        config.gt4py_config = config.gt4py_config.with_backend(backend).with_validate_args(
+            enable_checks
+        )
+        get_gt4py_stencil(name, version, config, externals=externals)(
+            in_file_path, write_in_file_path, out_file_path
+        )
 
 
 @click.command()
@@ -80,6 +84,7 @@ def run(
 @click.option("--backend", type=str, default="numpy")
 @click.option("--enable-checks/--disable-checks", is_flag=True, default=False)
 @click.option("--verbose", is_flag=True, default=False)
+@click.option("-l", "--list", "print_stencil_list", is_flag=True, default=False)
 def main(
     name: str,
     version: str,
@@ -96,6 +101,7 @@ def main(
     backend: str,
     enable_checks: bool,
     verbose: bool,
+    print_stencil_list: bool,
 ) -> None:
     run(
         name,
@@ -111,4 +117,5 @@ def main(
         backend=backend,
         enable_checks=enable_checks,
         verbose=verbose,
+        print_stencil_list=print_stencil_list,
     )

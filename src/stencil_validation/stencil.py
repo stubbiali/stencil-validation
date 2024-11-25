@@ -31,7 +31,28 @@ if TYPE_CHECKING:
 
 
 def get_stencil_id(name: str, version: str) -> str:
-    return f"{name}_{version}" if name != "" and version != "" else ""
+    return f"{name}__{version}" if name != "" and version != "" else ""
+
+
+def decode_stencil_id(stencil_id: str) -> tuple[str, str]:
+    if len(splits := stencil_id.split("__")) == 2:
+        name, version = splits
+    else:
+        name = version = ""
+    return name, version
+
+
+def print_stencil_list(stencil_collection: dict[str, type]) -> None:
+    stencil_list: dict[str, list[str]] = {}
+    for stencil_id in stencil_collection:
+        name, version = decode_stencil_id(stencil_id)
+        names = stencil_list.setdefault(version, [])
+        names.append(name)
+
+    for version, names in stencil_list.items():
+        print(f"* version={version}:")
+        for name in names:
+            print(f"    - name={name}")
 
 
 class MetaStencil(type):

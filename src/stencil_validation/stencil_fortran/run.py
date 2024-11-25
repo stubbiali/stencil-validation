@@ -24,7 +24,10 @@ from typing import TYPE_CHECKING
 
 from stencil_validation.config import Config
 from stencil_validation.settings import GLOBAL_SETTINGS
-from stencil_validation.stencil_fortran.stencil import get_fortran_stencil
+from stencil_validation.stencil_fortran.stencil import (
+    get_fortran_stencil,
+    print_fortran_stencil_list,
+)
 
 if TYPE_CHECKING:
     from typing import Literal, Optional
@@ -43,6 +46,7 @@ def run(
     data: dict,
     opt_level: Literal[0, 1, 2, 3],
     verbose: bool,
+    print_stencil_list: bool,
 ) -> None:
     GLOBAL_SETTINGS.with_verbosity(verbose)
     config = (
@@ -55,9 +59,12 @@ def run(
     for module in imports:
         importlib.import_module(module)
 
-    get_fortran_stencil(name, version, config)(
-        data, in_file_path, write_in_file_path, out_file_path, opt_level=opt_level, rebuild=True
-    )
+    if print_stencil_list:
+        print_fortran_stencil_list()
+    else:
+        get_fortran_stencil(name, version, config)(
+            data, in_file_path, write_in_file_path, out_file_path, opt_level=opt_level, rebuild=True
+        )
 
 
 @click.command()
@@ -68,13 +75,14 @@ def run(
 @click.option("--nz", type=int, default=1)
 @click.option("--data-size", "data_shape", type=(str, int), multiple=True)
 @click.option("--precision", type=str, default="double")
+@click.option("-i", "--import", "imports", type=str, multiple=True)
 @click.option("--input-file", type=str)
 @click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("-d", "--data", type=(str, str), multiple=True)
 @click.option("--opt-level", type=int, default=3)
 @click.option("--verbose", is_flag=True, default=False)
-@click.option("-i", "--import", "imports", type=str, multiple=True)
+@click.option("-l", "--list", "print_stencil_list", is_flag=True, default=False)
 def main(
     name: str,
     version: str,
@@ -90,6 +98,7 @@ def main(
     data: tuple[tuple[str, str], ...],
     opt_level: int,
     verbose: bool,
+    print_stencil_list: bool,
 ) -> None:
     run(
         name,
@@ -104,4 +113,5 @@ def main(
         data=dict(data),
         opt_level=opt_level,  # type: ignore[arg-type]
         verbose=verbose,
+        print_stencil_list=print_stencil_list,
     )

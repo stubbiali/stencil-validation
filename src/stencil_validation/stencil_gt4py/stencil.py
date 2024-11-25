@@ -22,9 +22,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.framework.stencil import compile_stencil, stencil_collection
-from stencil_validation.descriptors import concretize
 
-from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id
+from stencil_validation.descriptors import concretize
+from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
 
 if TYPE_CHECKING:
     from types import FunctionType
@@ -133,3 +133,6 @@ def get_gt4py_stencil(
     name: str, version: str, config: Config, externals: Optional[dict] = None
 ) -> GT4PyStencil:
     return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]
+
+
+print_gt4py_stencil_list = lambda: print_stencil_list(GT4PY_STENCIL_COLLECTION)
