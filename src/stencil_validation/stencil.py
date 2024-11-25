@@ -24,6 +24,7 @@ from stencil_validation.descriptors import concretize, to_file
 from stencil_validation.iox import io_file_operator
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from typing import Optional
 
     from stencil_validation.config import Config
@@ -42,21 +43,8 @@ def decode_stencil_id(stencil_id: str) -> tuple[str, str]:
     return name, version
 
 
-def print_stencil_list(stencil_collection: dict[str, type]) -> None:
-    stencil_list: dict[str, list[str]] = {}
-    for stencil_id in stencil_collection:
-        name, version = decode_stencil_id(stencil_id)
-        names = stencil_list.setdefault(version, [])
-        names.append(name)
-
-    for version, names in stencil_list.items():
-        print(f"* version={version}:")
-        for name in names:
-            print(f"    - name={name}")
-
-
 class MetaStencil(type):
-    COLLECTION: dict[str, type]
+    COLLECTION: Mapping[str, type]
 
     def __new__(cls, cls_name: str, bases: tuple[type, ...], dct: dict) -> type:
         name = dct.get("name", "")
@@ -67,7 +55,7 @@ class MetaStencil(type):
                 raise KeyError(f"Two stencils registered under `{stencil_id}`.")
             out = super().__new__(cls, cls_name, bases, dct)
             if stencil_id != "":
-                cls.COLLECTION[stencil_id] = out
+                cls.COLLECTION[stencil_id] = out  # type: ignore[index]
             return out
 
 
@@ -106,3 +94,16 @@ class Stencil:
     def write_args(self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str]) -> None:
         with io_file_operator(file_path, mode="w") as file_op:
             to_file(cdesc_dict, self.config, file_op)
+
+
+def print_stencil_list(stencil_collection: Mapping[str, MetaStencil]) -> None:
+    stencil_list: dict[str, list[str]] = {}
+    for stencil_id in stencil_collection:
+        name, version = decode_stencil_id(stencil_id)
+        names = stencil_list.setdefault(version, [])
+        names.append(name)
+
+    for version, names in stencil_list.items():
+        print(f"* version={version}:")
+        for name in names:
+            print(f"    - name={name}")

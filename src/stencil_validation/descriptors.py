@@ -232,7 +232,7 @@ class BaseField(Descriptor):
 
 @dataclasses.dataclass
 class Field(BaseField):
-    io_dims: Optional[tuple[Dim, ...]] = None
+    io_dims: tuple[Dim, ...] = ()
     io_dims_map: tuple[GenericDim, ...] = ()
 
     def __post_init__(self) -> None:
@@ -274,7 +274,7 @@ class Field(BaseField):
         dtype = self.get_dtype(config)
         value = io_file_op.get_field(
             self.io_name,  # type: ignore[arg-type]
-            dims=tuple(dim.with_size(config) for dim in self.io_dims),  # type: ignore[union-attr]
+            dims=tuple(dim.with_size(config) for dim in self.io_dims),
             dtype=dtype,
         )
         if value is None:
@@ -288,10 +288,10 @@ class Field(BaseField):
             if dim == ExpandedDim:
                 expand_axes.append(i)
                 j = None
-            elif dim in self.io_dims:  # type: ignore[operator]
-                j = self.io_dims.index(dim)  # type: ignore[union-attr]
-            elif -dim in self.io_dims:  # type: ignore[operator]
-                j = self.io_dims.index(-dim)  # type: ignore[union-attr]
+            elif dim in self.io_dims:
+                j = self.io_dims.index(dim)
+            elif -dim in self.io_dims:
+                j = self.io_dims.index(-dim)
                 flip_axes.append(j)
             else:
                 raise ValueError(f"{dim} not found in `io_dims`.")
