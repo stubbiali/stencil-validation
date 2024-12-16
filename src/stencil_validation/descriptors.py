@@ -45,7 +45,11 @@ class Descriptor:
     default_value: Optional[Any] = None
     dtype_name: Literal["bool", "float", "int"] = "float"
     io_name: Optional[str] = None
+    io_name_write: Optional[str] = None
     random_value_range: Optional[tuple[Any, Any]] = None
+
+    def __post_init__(self) -> None:
+        self.io_name_write = self.io_name_write or self.io_name
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
@@ -142,7 +146,7 @@ class Bool(Descriptor):
     def write_value(self, value: BoolType, config: Config, io_file_op: IOFileOperator) -> None:
         # note(stubbiali): netCDF4 does not support boolean fields
         io_file_op.set_field(
-            data=np.array([int(value)]), name=self.io_name, dtype=int  # type: ignore[arg-type]
+            data=np.array([int(value)]), name=self.io_name_write, dtype=int  # type: ignore[arg-type]
         )
 
 
@@ -167,7 +171,7 @@ class Int(Descriptor):
     def write_value(self, value: IntType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
             data=np.array([value]),
-            name=self.io_name,  # type: ignore[arg-type]
+            name=self.io_name_write,  # type: ignore[arg-type]
             dtype=config.gt4py_config.dtypes.int,
         )
 
@@ -193,7 +197,7 @@ class Float(Descriptor):
     def write_value(self, value: FloatType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
             data=np.array([value]),
-            name=self.io_name,  # type: ignore[arg-type]
+            name=self.io_name_write,  # type: ignore[arg-type]
             dtype=config.gt4py_config.dtypes.float,
         )
 
@@ -205,6 +209,7 @@ class BaseField(Descriptor):
 
     def __post_init__(self) -> None:
         self.padding = self.padding or (0,) * len(self.dims)
+        super().__post_init__()
 
     @property
     def ndim(self) -> int:
@@ -352,7 +357,7 @@ class Field(BaseField):
 
         io_file_op.set_field(
             data,
-            name=self.io_name,  # type: ignore[arg-type]
+            name=self.io_name_write,  # type: ignore[arg-type]
             dims=ds_dims,
             dtype=self.get_dtype(config),
         )
