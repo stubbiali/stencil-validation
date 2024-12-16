@@ -11,6 +11,13 @@ if TYPE_CHECKING:
     from stencil_validation.descriptors import DescriptorDict
 
 
+IJK_ARGS = lambda dtype_name="float": {
+    "dims": (IJ, K),
+    "dtype_name": dtype_name,
+    "io_dims": (K, IJ),
+}
+
+
 class _(FortranStencil, metaclass=MetaFortranStencil):
     name: str = "math_functions"
     version: str = "demo"
@@ -24,18 +31,18 @@ class _(FortranStencil, metaclass=MetaFortranStencil):
     @property
     def in_descriptors(self) -> DescriptorDict:
         return {
-            "a": FortranField(dims=(IJ, K), dtype_name="float", random_value_range=(-1000, 1000)),
-            "b": FortranField(dims=(IJ, K), dtype_name="float", random_value_range=(-1000, 1000)),
+            "a": FortranField(io_name="A", random_value_range=(-1000, 1000), **IJK_ARGS()),
+            "b": FortranField(io_name="B", random_value_range=(-1000, 1000), **IJK_ARGS()),
         }
 
     @property
     def out_descriptors(self) -> DescriptorDict:
         return {
-            "c1": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c2": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c3": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c4": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c5": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c6": FortranField(dims=(IJ, K), dtype_name="float"),
-            "c7": FortranField(dims=(IJ, K), dtype_name="float"),
+            "c1": FortranField(**IJK_ARGS()),
+            "c2": FortranField(**IJK_ARGS()),
+            "c3": FortranField(**IJK_ARGS()),
+            "c4": FortranField(**IJK_ARGS()),
+            "c5": FortranField(**IJK_ARGS()),
+            "c6": FortranField(**IJK_ARGS()),
+            "c7": FortranField(**IJK_ARGS(), io_name_write="c7_write"),
         }

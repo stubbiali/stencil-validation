@@ -27,7 +27,7 @@ from stencil_validation.stencil_gt4py.run import run
 @click.option("--nlev", type=int, default=1)
 @click.option("--precision", type=str, default="double")
 @click.option("--input-file", type=str)
-@click.option("--overwrite-input-file", is_flag=True, default=False)
+@click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("--backend", type=str, default="numpy")
 @click.option("--enable-checks/--disable-checks", is_flag=True, default=False)
@@ -37,7 +37,7 @@ def main(
     nlev: int,
     precision: str,
     input_file: str,
-    overwrite_input_file: bool,
+    write_input_file: str,
     output_file: str,
     backend: str,
     enable_checks: bool,
@@ -48,15 +48,16 @@ def main(
         version="demo",
         grid_shape=(nlon, 1, nlev),
         data_shape={},
-        precision=precision,
+        precision=precision,  # type: ignore[arg-type]
         imports=("_gt4py.math_functions",),
         in_file_path=input_file,
-        overwrite_in_file=overwrite_input_file,
+        write_in_file_path=write_input_file,
         out_file_path=output_file,
         externals={},
         backend=backend,
         enable_checks=enable_checks,
         verbose=verbose,
+        print_stencil_list=False,
     )
 
 

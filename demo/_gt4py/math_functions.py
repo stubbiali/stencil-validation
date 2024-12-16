@@ -59,13 +59,13 @@ class _(GT4PyStencil, metaclass=MetaGT4PyStencil):
     @property
     def out_descriptors(self) -> DescriptorDict:
         return {
-            "out_c1": GT4PyField(io_name="C1", **IJK_ARGS()),
-            "out_c2": GT4PyField(io_name="C2", **IJK_ARGS()),
-            "out_c3": GT4PyField(io_name="C3", **IJK_ARGS()),
-            "out_c4": GT4PyField(io_name="C4", **IJK_ARGS()),
-            "out_c5": GT4PyField(io_name="C5", **IJK_ARGS()),
-            "out_c6": GT4PyField(io_name="C6", **IJK_ARGS()),
-            "out_c7": GT4PyField(io_name="C7", **IJK_ARGS()),
+            "out_c1": GT4PyField(io_name="c1", **IJK_ARGS()),
+            "out_c2": GT4PyField(io_name="c2", **IJK_ARGS()),
+            "out_c3": GT4PyField(io_name="c3", **IJK_ARGS()),
+            "out_c4": GT4PyField(io_name="c4", **IJK_ARGS()),
+            "out_c5": GT4PyField(io_name="c5", **IJK_ARGS()),
+            "out_c6": GT4PyField(io_name="c6", **IJK_ARGS()),
+            "out_c7": GT4PyField(io_name="c7", io_name_write="c7_write", **IJK_ARGS()),
         }
 
     @property
