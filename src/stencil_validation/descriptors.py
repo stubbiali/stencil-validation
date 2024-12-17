@@ -44,6 +44,7 @@ class Descriptor:
     default_io_file_path: Optional[str] = None
     default_value: Optional[Any] = None
     dtype_name: Literal["bool", "float", "int"] = "float"
+    io_file_path: Optional[str] = None
     io_name: Optional[str] = None
     io_name_write: Optional[str] = None
     random_value_range: Optional[tuple[Any, Any]] = None
@@ -99,7 +100,13 @@ class ConcretizedDescriptor:
         value = None
 
         if desc.io_name is not None:
-            if io_file_op is not None:
+            if desc.io_file_path is not None:
+                with io_file_operator(desc.io_file_path, "r") as io_file_op:
+                    if io_file_op is not None:
+                        if (value := desc.read_value(config, io_file_op)) is None:
+                            printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+
+            if value is None and io_file_op is not None:
                 if (value := desc.read_value(config, io_file_op)) is None:
                     printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
