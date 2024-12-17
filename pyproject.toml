@@ -58,6 +58,7 @@ dev = [
     'ipdb',
     'ipython==8.22.0',  # note(stubbiali): required to make ipdb work
     'mypy',
+    'pint>=0.7',
     'pre-commit',
 ]
 test = ['pytest']

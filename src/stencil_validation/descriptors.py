@@ -48,6 +48,7 @@ class Descriptor:
     io_name: Optional[str] = None
     io_name_write: Optional[str] = None
     random_value_range: Optional[tuple[Any, Any]] = None
+    units: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.io_name_write = self.io_name_write or self.io_name
@@ -171,7 +172,7 @@ class Int(Descriptor):
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
         value = io_file_op.get_field(
-            self.io_name, dtype=config.gt4py_config.dtypes.int  # type: ignore[arg-type]
+            self.io_name, dtype=config.gt4py_config.dtypes.int, units=self.units  # type: ignore[arg-type]
         )
         return value.item() if value is not None else None
 
@@ -180,6 +181,7 @@ class Int(Descriptor):
             data=np.array([value]),
             name=self.io_name_write,  # type: ignore[arg-type]
             dtype=config.gt4py_config.dtypes.int,
+            units=self.units,
         )
 
 
@@ -197,7 +199,7 @@ class Float(Descriptor):
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
         value = io_file_op.get_field(
-            self.io_name, dtype=config.gt4py_config.dtypes.float  # type: ignore[arg-type]
+            self.io_name, dtype=config.gt4py_config.dtypes.float, units=self.units  # type: ignore[arg-type]
         )
         return value.item() if value is not None else None
 
@@ -206,6 +208,7 @@ class Float(Descriptor):
             data=np.array([value]),
             name=self.io_name_write,  # type: ignore[arg-type]
             dtype=config.gt4py_config.dtypes.float,
+            units=self.units,
         )
 
 
@@ -288,6 +291,7 @@ class Field(BaseField):
             self.io_name,  # type: ignore[arg-type]
             dims=tuple(dim.with_size(config) for dim in self.io_dims),
             dtype=dtype,
+            units=self.units,
         )
         if value is None:
             return None
@@ -367,6 +371,7 @@ class Field(BaseField):
             name=self.io_name_write,  # type: ignore[arg-type]
             dims=ds_dims,
             dtype=self.get_dtype(config),
+            units=self.units,
         )
 
 

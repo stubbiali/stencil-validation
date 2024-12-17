@@ -27,6 +27,7 @@ import os
 from typing import TYPE_CHECKING
 
 from stencil_validation.dims import Dim, SizedDim
+from stencil_validation.units import get_conversion_factor
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
@@ -51,6 +52,7 @@ class IOFileOperator(ABC):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> Optional[NDArray]:
         pass
 
@@ -61,6 +63,7 @@ class IOFileOperator(ABC):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> None:
         pass
 
@@ -84,6 +87,7 @@ class HDF5Operator(IOFileOperator):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> Optional[NDArray]:
         ds = self.f.get(name, None)
         if ds is None:
@@ -105,6 +109,7 @@ class HDF5Operator(IOFileOperator):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> None:
         dtype = dtype or data.dtype
         if dims is None:
@@ -142,11 +147,21 @@ class NetCDFOperator(IOFileOperator):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> Optional[NDArray]:
         if name not in self.ds.variables:
             return None
         else:
-            out = np.asarray(self.ds[name])
+            if (
+                units is not None
+                and (ds_units := getattr(self.ds[name], "units", None)) is not None
+            ):
+                factor = get_conversion_factor(ds_units, units)
+            else:
+                factor = 1.0
+
+            out = factor * np.asarray(self.ds[name])
+
             if dims is not None:
                 if out.ndim != len(dims):
                     raise RuntimeError(
@@ -154,6 +169,7 @@ class NetCDFOperator(IOFileOperator):
                     )
             if dtype is not None:
                 out = out.astype(dtype)
+
             return out
 
     def set_field(
@@ -162,6 +178,7 @@ class NetCDFOperator(IOFileOperator):
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
+        units: Optional[str] = None,
     ) -> None:
         dtype = dtype or data.dtype
         if dims is None:
@@ -181,7 +198,11 @@ class NetCDFOperator(IOFileOperator):
 
         if name not in self.ds.variables:
             self.ds.createVariable(name, dtype, nc_dims)  # type: ignore[arg-type]
+
         self.ds[name][tuple(index_slices)] = data
+
+        if units is not None:
+            self.ds[name].units = units
 
 
 @contextmanager
