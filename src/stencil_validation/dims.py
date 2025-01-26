@@ -95,6 +95,10 @@ class Dim:
         else:
             return f"-{self.name}" if self.direction == Direction.NEGATIVE else f"{self.name}"
 
+    @property
+    def __gt_axis_name__(self) -> str:
+        return str(self.static_size) if self.static_size is not None else self.name
+
     def with_size(self, config: Optional[Config] = None) -> SizedDim:
         if config is None:
             assert self.static_size is not None

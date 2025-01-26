@@ -36,19 +36,30 @@ class GT4PyField(Field):
     def get_default_value(self, config: Config) -> Optional[NDArray]:
         if (value := super().get_default_value(config)) is not None:
             return from_array(
-                value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend
+                value,
+                dtype=self.get_dtype(config),
+                backend=config.gt4py_config.backend,
+                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
             )
         else:
             return value
 
     def get_random_value(self, config: Config) -> NDArray:
         value = super().get_random_value(config)
-        return from_array(value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend)
+        return from_array(
+            value,
+            dtype=self.get_dtype(config),
+            backend=config.gt4py_config.backend,
+            dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+        )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
         if (value := super().read_value(config, io_file_op)) is not None:
             return from_array(
-                value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend
+                value,
+                dtype=self.get_dtype(config),
+                backend=config.gt4py_config.backend,
+                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
             )
         else:
             return value
@@ -66,5 +77,10 @@ class CompositeGT4PyField(CompositeField):
         value = super().concretize(config, io_file_op).value
         return ConcretizedDescriptor(
             self,
-            from_array(value, dtype=self.get_dtype(config), backend=config.gt4py_config.backend),
+            from_array(
+                value,
+                dtype=self.get_dtype(config),
+                backend=config.gt4py_config.backend,
+                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+            ),
         )
