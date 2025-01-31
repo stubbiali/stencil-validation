@@ -164,6 +164,13 @@ class Int(Descriptor):
     dtype_name: Literal["int"] = "int"
     random_value_range: Optional[tuple[IntType, IntType]] = None
 
+    def get_default_value(self, config: Config) -> Optional[IntType]:
+        return (
+            config.gt4py_config.dtypes.int(self.default_value)
+            if self.default_value is not None
+            else None
+        )
+
     def get_random_value(self, config: Config) -> IntType:
         low, high = self.random_value_range or (0, 1)
         return np.random.randint(  # type: ignore[return-value]
@@ -171,10 +178,8 @@ class Int(Descriptor):
         )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
-        value = io_file_op.get_field(
-            self.io_name, dtype=config.gt4py_config.dtypes.int, units=self.units  # type: ignore[arg-type]
-        )
-        return value.item() if value is not None else None
+        value = io_file_op.get_field(self.io_name, units=self.units)  # type: ignore[arg-type]
+        return config.gt4py_config.dtypes.int(value.item()) if value is not None else None
 
     def write_value(self, value: IntType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
@@ -191,6 +196,13 @@ class Float(Descriptor):
     dtype_name: Literal["float"] = "float"
     random_value_range: Optional[tuple[FloatType, FloatType]] = None
 
+    def get_default_value(self, config: Config) -> Optional[FloatType]:
+        return (
+            config.gt4py_config.dtypes.float(self.default_value)
+            if self.default_value is not None
+            else None
+        )
+
     def get_random_value(self, config: Config) -> FloatType:
         low, high = self.random_value_range or (0, 1)
         return config.gt4py_config.dtypes.float(  # type: ignore[no-any-return]
@@ -198,10 +210,8 @@ class Float(Descriptor):
         )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
-        value = io_file_op.get_field(
-            self.io_name, dtype=config.gt4py_config.dtypes.float, units=self.units  # type: ignore[arg-type]
-        )
-        return value.item() if value is not None else None
+        value = io_file_op.get_field(self.io_name, units=self.units)  # type: ignore[arg-type]
+        return config.gt4py_config.dtypes.float(value.item()) if value is not None else None
 
     def write_value(self, value: FloatType, config: Config, io_file_op: IOFileOperator) -> None:
         io_file_op.set_field(
