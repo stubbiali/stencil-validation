@@ -29,17 +29,36 @@ if TYPE_CHECKING:
     from typing import Optional
 
     from stencil_validation.config import Config
+    from stencil_validation.dims import Dim
     from stencil_validation.iox import IOFileOperator
 
 
+def get_gt_dims(dims: tuple[Dim, ...]) -> tuple[str, ...]:
+    gt_dims = []
+    counter = 0
+    for dim in dims:
+        if dim.name in "IJK":
+            gt_dims.append(dim.name)
+        else:
+            gt_dims.append(str(counter))
+            counter += 1
+    return tuple(gt_dims)
+
+
 class GT4PyField(Field):
+    gt_dims: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self.gt_dims = get_gt_dims(self.dims)
+
     def get_default_value(self, config: Config) -> Optional[NDArray]:
         if (value := super().get_default_value(config)) is not None:
             return from_array(
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,
-                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+                dimensions=self.gt_dims,
             )
         else:
             return value
@@ -50,7 +69,7 @@ class GT4PyField(Field):
             value,
             dtype=self.get_dtype(config),
             backend=config.gt4py_config.backend,
-            dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+            dimensions=self.gt_dims,
         )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
@@ -59,7 +78,7 @@ class GT4PyField(Field):
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,
-                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+                dimensions=self.gt_dims,
             )
         else:
             return value
@@ -70,6 +89,7 @@ class CompositeGT4PyField(CompositeField):
         for field in self.fields_map.values():
             assert isinstance(field, GT4PyField)
         super().__post_init__()
+        self.gt_dims = get_gt_dims(self.dims)
 
     def concretize(
         self, config: Config, io_file_op: Optional[IOFileOperator] = None
@@ -81,6 +101,6 @@ class CompositeGT4PyField(CompositeField):
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,
-                dimensions=tuple(dim.__gt_axis_name__ for dim in self.dims),
+                dimensions=self.gt_dims,
             ),
         )
