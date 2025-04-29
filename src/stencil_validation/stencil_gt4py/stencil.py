@@ -109,11 +109,11 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
     ) -> None:
-        in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
-        inout_cdesc_dict = self.read_args(self.inout_descriptors, in_file_path)
+        in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_path)
+        inout_cdesc_dict = self.read_args(self.inject_io_name(self.inout_descriptors), in_file_path)
         self.write_args({**in_cdesc_dict, **inout_cdesc_dict}, write_in_file_path)
-        out_cdesc_dict = concretize(self.out_descriptors, self.config)
-        tmp_cdesc_dict = concretize(self.tmp_descriptors, self.config)
+        out_cdesc_dict = concretize(self.inject_io_name(self.out_descriptors), self.config)
+        tmp_cdesc_dict = concretize(self.inject_io_name(self.tmp_descriptors), self.config)
         self.process_cdesc_dicts(in_cdesc_dict, inout_cdesc_dict, out_cdesc_dict, tmp_cdesc_dict)
 
         self.stencil_obj(
