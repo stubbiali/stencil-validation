@@ -43,6 +43,7 @@ def run(
     externals: dict,
     backend: str,
     enable_checks: bool,
+    num_runs: Optional[int],
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
@@ -64,7 +65,7 @@ def run(
             enable_checks
         )
         get_gt4py_stencil(name, version, config, externals=externals)(
-            in_file_path, write_in_file_path, out_file_path
+            in_file_path, write_in_file_path, out_file_path, num_runs=num_runs,
         )
 
 
@@ -83,6 +84,7 @@ def run(
 @click.option("-e", "--external", "externals", type=(str, str), multiple=True)
 @click.option("--backend", type=str, default="numpy")
 @click.option("--enable-checks/--disable-checks", is_flag=True, default=False)
+@click.option("--num-runs", type=int, default=0)
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("-l", "--list", "print_stencil_list", is_flag=True, default=False)
 def main(
@@ -100,6 +102,7 @@ def main(
     externals: tuple[tuple[str, str], ...],
     backend: str,
     enable_checks: bool,
+        num_runs: int,
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
@@ -116,6 +119,7 @@ def main(
         externals=dict(externals),
         backend=backend,
         enable_checks=enable_checks,
+        num_runs=num_runs,
         verbose=verbose,
         print_stencil_list=print_stencil_list,
     )

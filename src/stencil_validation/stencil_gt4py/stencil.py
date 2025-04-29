@@ -22,6 +22,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.framework.stencil import compile_stencil, stencil_collection
+from ifs_physics_common.utils.timing import timing
 
 from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
@@ -108,6 +109,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         in_file_path: Optional[str] = None,
         write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
+            num_runs: Optional[int] = None,
     ) -> None:
         in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_path)
         inout_cdesc_dict = self.read_args(self.inject_io_name(self.inout_descriptors), in_file_path)
@@ -117,17 +119,33 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         self.process_cdesc_dicts(in_cdesc_dict, inout_cdesc_dict, out_cdesc_dict, tmp_cdesc_dict)
 
         self.stencil_obj(
-            **{key: cdesc.value for key, cdesc in in_cdesc_dict.items()},
-            **{key: cdesc.value for key, cdesc in inout_cdesc_dict.items()},
-            **{key: cdesc.value for key, cdesc in out_cdesc_dict.items()},
-            **{key: cdesc.value for key, cdesc in tmp_cdesc_dict.items()},
+            **(in_args := {key: cdesc.value for key, cdesc in in_cdesc_dict.items()}),
+            **(inout_args := {key: cdesc.value for key, cdesc in inout_cdesc_dict.items()}),
+            **(out_args := {key: cdesc.value for key, cdesc in out_cdesc_dict.items()}),
+            **(tmp_args :={key: cdesc.value for key, cdesc in tmp_cdesc_dict.items()}),
             origin=self.origin,
             domain=self.domain,
-            exec_info=self.config.gt4py_config.exec_info,
-            validate_args=self.config.gt4py_config.validate_args,
+            exec_info=(exec_info := self.config.gt4py_config.exec_info),
+            validate_args=(validate_args := self.config.gt4py_config.validate_args),
         )
 
         self.write_args({**inout_cdesc_dict, **out_cdesc_dict}, out_file_path)
+
+        num_runs = num_runs or 0
+        if num_runs > 0:
+            with timing(self.name) as timer:
+                for _ in range(num_runs):
+                    self.stencil_obj(
+                        **in_args,
+                        **inout_args,
+                        **out_args,
+                        **tmp_args,
+                        origin=self.origin,
+                        domain=self.domain,
+                        exec_info=exec_info,
+                        validate_args=validate_args
+                    )
+            print(f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms.")
 
 
 def get_gt4py_stencil(

@@ -45,6 +45,7 @@ def run(
     out_file_path: Optional[str],
     data: dict,
     opt_level: Literal[0, 1, 2, 3],
+    num_runs: Optional[int],
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
@@ -63,7 +64,7 @@ def run(
         print_fortran_stencil_list()
     else:
         get_fortran_stencil(name, version, config)(
-            data, in_file_path, write_in_file_path, out_file_path, opt_level=opt_level, rebuild=True
+            data, in_file_path, write_in_file_path, out_file_path, opt_level=opt_level, rebuild=True, num_runs=num_runs
         )
 
 
@@ -81,6 +82,7 @@ def run(
 @click.option("-o", "--output-file", type=str)
 @click.option("-d", "--data", type=(str, str), multiple=True)
 @click.option("--opt-level", type=int, default=3)
+@click.option("--num-runs", type=int, default=0)
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("-l", "--list", "print_stencil_list", is_flag=True, default=False)
 def main(
@@ -97,6 +99,7 @@ def main(
     output_file: str,
     data: tuple[tuple[str, str], ...],
     opt_level: int,
+    num_runs: int,
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
@@ -112,6 +115,7 @@ def main(
         out_file_path=output_file,
         data=dict(data),
         opt_level=opt_level,  # type: ignore[arg-type]
+        num_runs=num_runs,
         verbose=verbose,
         print_stencil_list=print_stencil_list,
     )

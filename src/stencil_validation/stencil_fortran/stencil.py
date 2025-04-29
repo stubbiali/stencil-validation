@@ -21,6 +21,8 @@ from __future__ import annotations
 import numpy as np
 from typing import TYPE_CHECKING
 
+from ifs_physics_common.utils.timing import timing
+
 from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
 from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
@@ -54,11 +56,12 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         include_dirs: Optional[list[str]] = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
+        num_runs: Optional[int] = None,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
         in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
         self.write_args(in_cdesc_dict, write_in_file_path)
-        out_cdesc_dict = self.run(fn, in_cdesc_dict)
+        out_cdesc_dict = self.run(fn, in_cdesc_dict, num_runs)
         self.write_args(out_cdesc_dict, out_file_path)
 
     def compile(
@@ -87,7 +90,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         return fn  # type: ignore[no-any-return]
 
     def run(
-        self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict
+        self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict, num_runs: Optional[int]
     ) -> ConcretizedDescriptorDict:
         in_args = {key: cdesc.value for key, cdesc in in_cdesc_dict.items()}
         out_args = fn(**in_args)
@@ -99,10 +102,19 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
             )
 
         out_desc_dict = self.inject_io_name(self.out_descriptors)
-        return {
+        out_cdesc_dict = {
             key: ConcretizedDescriptor(desc, value)
             for (key, desc), value in zip(out_desc_dict.items(), out_args)
         }
+
+        num_runs = num_runs or 0
+        if num_runs > 0:
+            with timing(self.name) as timer:
+                for _ in range(num_runs):
+                    _ = fn(**in_args)
+            print(f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms.")
+
+        return out_cdesc_dict
 
 
 def get_fortran_stencil(name: str, version: str, config: Config) -> FortranStencil:
