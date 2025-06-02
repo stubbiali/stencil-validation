@@ -109,7 +109,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         in_file_path: Optional[str] = None,
         write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
-            num_runs: Optional[int] = None,
+        num_runs: Optional[int] = None,
     ) -> None:
         in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_path)
         inout_cdesc_dict = self.read_args(self.inject_io_name(self.inout_descriptors), in_file_path)
@@ -122,7 +122,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
             **(in_args := {key: cdesc.value for key, cdesc in in_cdesc_dict.items()}),
             **(inout_args := {key: cdesc.value for key, cdesc in inout_cdesc_dict.items()}),
             **(out_args := {key: cdesc.value for key, cdesc in out_cdesc_dict.items()}),
-            **(tmp_args :={key: cdesc.value for key, cdesc in tmp_cdesc_dict.items()}),
+            **(tmp_args := {key: cdesc.value for key, cdesc in tmp_cdesc_dict.items()}),
             origin=self.origin,
             domain=self.domain,
             exec_info=(exec_info := self.config.gt4py_config.exec_info),
@@ -143,9 +143,12 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
                         origin=self.origin,
                         domain=self.domain,
                         exec_info=exec_info,
-                        validate_args=validate_args
+                        validate_args=validate_args,
                     )
-            print(f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms.")
+            print(
+                f"Average execution time over {num_runs} runs: "
+                f"{timer.get_time(self.name, units='ms') / num_runs:.3f} ms."
+            )
 
 
 def get_gt4py_stencil(
