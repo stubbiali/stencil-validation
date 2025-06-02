@@ -186,20 +186,23 @@ class NetCDFOperator(IOFileOperator):
                 raise RuntimeError(
                     f"If `dims` is `None`, `data` must be 1-item, but has {data.size} elements."
                 )
-            index_slices = [0]
-            dims = [Scalar]
+
+            if name not in self.ds.variables:
+                self.ds.createVariable(name, dtype)  # type: ignore[arg-type]
+
+            self.ds[name][...] = data
         else:
             index_slices = [dim.get_index_slice() for dim in dims]  # type: ignore[misc]
 
-        nc_dims = [str(dim.dim).replace(" ", "") for dim in dims]
-        for nc_dim, dim in zip(nc_dims, dims):
-            if nc_dim not in self.ds.dimensions:
-                self.ds.createDimension(nc_dim, dim.size)
+            nc_dims = [str(dim.dim).replace(" ", "") for dim in dims]
+            for nc_dim, dim in zip(nc_dims, dims):
+                if nc_dim not in self.ds.dimensions:
+                    self.ds.createDimension(nc_dim, dim.size)
 
-        if name not in self.ds.variables:
-            self.ds.createVariable(name, dtype, nc_dims)  # type: ignore[arg-type]
+            if name not in self.ds.variables:
+                self.ds.createVariable(name, dtype, nc_dims)  # type: ignore[arg-type]
 
-        self.ds[name][tuple(index_slices)] = data
+            self.ds[name][tuple(index_slices)] = data
 
         if units is not None:
             self.ds[name].units = units
