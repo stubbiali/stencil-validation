@@ -23,6 +23,7 @@ from stencil_validation.stencil_gt4py.run import run
 
 
 @click.command()
+@click.option("--name", type=str, default="math_functions")
 @click.option("--nlon", type=int, default=1)
 @click.option("--nlev", type=int, default=1)
 @click.option("--precision", type=str, default="double")
@@ -31,8 +32,10 @@ from stencil_validation.stencil_gt4py.run import run
 @click.option("-o", "--output-file", type=str)
 @click.option("--backend", type=str, default="numpy")
 @click.option("--enable-checks/--disable-checks", is_flag=True, default=False)
+@click.option("--num-runs", type=int, default=0)
 @click.option("--verbose", is_flag=True, default=False)
 def main(
+    name: str,
     nlon: int,
     nlev: int,
     precision: str,
@@ -41,21 +44,23 @@ def main(
     output_file: str,
     backend: str,
     enable_checks: bool,
+    num_runs: int,
     verbose: bool,
 ) -> None:
     run(
-        name="math_functions",
+        name=name,
         version="demo",
         grid_shape=(nlon, 1, nlev),
         data_shape={},
         precision=precision,  # type: ignore[arg-type]
-        imports=("_gt4py.math_functions",),
+        imports=("_gt4py",),
         in_file_path=input_file,
         write_in_file_path=write_input_file,
         out_file_path=output_file,
         externals={},
         backend=backend,
         enable_checks=enable_checks,
+        num_runs=num_runs,
         verbose=verbose,
         print_stencil_list=False,
     )

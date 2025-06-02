@@ -30,6 +30,7 @@ from stencil_validation.stencil_fortran.run import run
 @click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("--opt-level", type=int, default=3)
+@click.option("--num-runs", type=int, default=0)
 @click.option("--verbose", is_flag=True, default=False)
 def main(
     nlon: int,
@@ -39,6 +40,7 @@ def main(
     write_input_file: str,
     output_file: str,
     opt_level: int,
+    num_runs: int,
     verbose: bool,
 ) -> None:
     run(
@@ -53,6 +55,7 @@ def main(
         out_file_path=output_file,
         data={"nlon": nlon, "nlev": nlev, "precision": precision},
         opt_level=opt_level,  # type: ignore[arg-type]
+        num_runs=num_runs,
         verbose=verbose,
         print_stencil_list=False,
     )
