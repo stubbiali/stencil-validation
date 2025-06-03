@@ -37,7 +37,7 @@ def run(
     data_shape: dict[str, int],
     precision: Literal["double", "single"],
     imports: tuple[str, ...],
-    in_file_path: Optional[str],
+    in_file_paths: Optional[tuple[str, ...]],
     write_in_file_path: Optional[str],
     out_file_path: Optional[str],
     externals: dict,
@@ -65,7 +65,7 @@ def run(
             enable_checks
         )
         get_gt4py_stencil(name, version, config, externals=externals)(
-            in_file_path, write_in_file_path, out_file_path, num_runs=num_runs,
+            in_file_paths, write_in_file_path, out_file_path, num_runs=num_runs
         )
 
 
@@ -78,7 +78,7 @@ def run(
 @click.option("--data-size", "data_shape", type=(str, int), multiple=True)
 @click.option("--precision", type=str, default="double")
 @click.option("-i", "--import", "imports", type=str, multiple=True)
-@click.option("--input-file", type=str)
+@click.option("--input-file", "input_files", type=str, multiple=True)
 @click.option("--write-input-file", type=str)
 @click.option("-o", "--output-file", type=str)
 @click.option("-e", "--external", "externals", type=(str, str), multiple=True)
@@ -96,13 +96,13 @@ def main(
     data_shape: tuple[tuple[str, int], ...],
     precision: str,
     imports: tuple[str, ...],
-    input_file: str,
+    input_files: tuple[str, ...],
     write_input_file: str,
     output_file: str,
     externals: tuple[tuple[str, str], ...],
     backend: str,
     enable_checks: bool,
-        num_runs: int,
+    num_runs: int,
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
@@ -113,7 +113,7 @@ def main(
         data_shape=dict(data_shape),
         precision=precision,  # type: ignore[arg-type]
         imports=imports,
-        in_file_path=input_file,
+        in_file_paths=input_files,
         write_in_file_path=write_input_file,
         out_file_path=output_file,
         externals=dict(externals),

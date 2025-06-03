@@ -106,13 +106,15 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 
     def __call__(
         self,
-        in_file_path: Optional[str] = None,
+        in_file_paths: Optional[tuple[str, ...]] = None,
         write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
         num_runs: Optional[int] = None,
     ) -> None:
-        in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_path)
-        inout_cdesc_dict = self.read_args(self.inject_io_name(self.inout_descriptors), in_file_path)
+        in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_paths)
+        inout_cdesc_dict = self.read_args(
+            self.inject_io_name(self.inout_descriptors), in_file_paths
+        )
         self.write_args({**in_cdesc_dict, **inout_cdesc_dict}, write_in_file_path)
         out_cdesc_dict = concretize(self.inject_io_name(self.out_descriptors), self.config)
         tmp_cdesc_dict = concretize(self.inject_io_name(self.tmp_descriptors), self.config)

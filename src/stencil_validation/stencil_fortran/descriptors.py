@@ -56,7 +56,7 @@ class CompositeFortranField(CompositeField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
-        value = super().concretize(config, io_file_op).value
+        value = super().concretize(config, io_file_paths).value
         return ConcretizedDescriptor(self, np.asfortranarray(value))

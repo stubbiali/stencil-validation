@@ -50,7 +50,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
     def __call__(
         self,
         template_var_values: Optional[dict[str, Any]] = None,
-        in_file_path: Optional[str] = None,
+        in_file_paths: Optional[tuple[str, ...]] = None,
         write_in_file_path: Optional[str] = None,
         out_file_path: Optional[str] = None,
         include_dirs: Optional[list[str]] = None,
@@ -59,7 +59,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         num_runs: Optional[int] = None,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
-        in_cdesc_dict = self.read_args(self.in_descriptors, in_file_path)
+        in_cdesc_dict = self.read_args(self.in_descriptors, in_file_paths)
         self.write_args(in_cdesc_dict, write_in_file_path)
         out_cdesc_dict = self.run(fn, in_cdesc_dict, num_runs)
         self.write_args(out_cdesc_dict, out_file_path)
@@ -112,7 +112,9 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
             with timing(self.name) as timer:
                 for _ in range(num_runs):
                     _ = fn(**in_args)
-            print(f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms.")
+            print(
+                f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms."
+            )
 
         return out_cdesc_dict
 

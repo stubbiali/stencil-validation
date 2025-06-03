@@ -84,12 +84,10 @@ class Stencil:
         return desc_dict
 
     def read_args(
-        self, desc_dict: DescriptorDict, file_path: Optional[str]
+        self, desc_dict: DescriptorDict, file_paths: Optional[tuple[str, ...]]
     ) -> ConcretizedDescriptorDict:
         desc_dict = self.inject_io_name(desc_dict)
-        with io_file_operator(file_path, mode="r") as file_op:
-            cdesc_dict = concretize(desc_dict, self.config, file_op)
-        return cdesc_dict
+        return concretize(desc_dict, self.config, file_paths)
 
     def write_args(self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str]) -> None:
         with io_file_operator(file_path, mode="w") as file_op:

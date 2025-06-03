@@ -92,9 +92,9 @@ class CompositeGT4PyField(CompositeField):
         self.gt_dims = get_gt_dims(self.dims)
 
     def concretize(
-        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
-        value = super().concretize(config, io_file_op).value
+        value = super().concretize(config, io_file_paths).value
         return ConcretizedDescriptor(
             self,
             from_array(

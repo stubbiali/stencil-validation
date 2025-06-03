@@ -18,8 +18,8 @@
 # under the License.
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from contextlib import contextmanager
+import dataclasses
 import h5py as h5
 import netCDF4 as nc
 import numpy as np
@@ -33,20 +33,18 @@ from stencil_validation.utils import printx
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
     from numpy.typing import DTypeLike, NDArray
-    from typing import Any, Literal, Optional
+    from typing import Literal, Optional
 
 
-class IOFileOperator(ABC):
-    f_path: str
-
-    def __init__(self, io_file_path: str, *args: Any, **kwargs: Any) -> None:
-        self.f_path = io_file_path
+@dataclasses.dataclass
+class IOFileOperator:
+    f_path: str = ""
+    mode: Literal["a", "r", "w"] = "r"
 
     @property
     def field_names(self) -> tuple[str, ...]:
         return ()
 
-    @abstractmethod
     def get_field(
         self,
         name: str,
@@ -54,9 +52,8 @@ class IOFileOperator(ABC):
         dtype: Optional[DTypeLike] = None,
         units: Optional[str] = None,
     ) -> Optional[NDArray]:
-        pass
+        return None
 
-    @abstractmethod
     def set_field(
         self,
         data: NDArray,
@@ -68,12 +65,13 @@ class IOFileOperator(ABC):
         pass
 
 
-class HDF5Operator(IOFileOperator):
-    f: h5.File
+DUMMY_IO_FILE_OP = IOFileOperator()
 
-    def __init__(self, io_file_path: str, mode: Literal["a", "r", "w"]) -> None:
-        super().__init__(io_file_path)
-        self.f = h5.File(io_file_path, mode=mode)
+
+@dataclasses.dataclass
+class HDF5Operator(IOFileOperator):
+    def __post_init__(self) -> None:
+        self.f = h5.File(self.f_path, mode=self.mode)
 
     def __del__(self) -> None:
         self.f.close()
@@ -96,9 +94,11 @@ class HDF5Operator(IOFileOperator):
             out = np.asarray(ds[...])
             if dims is not None:
                 if out.ndim != len(dims):
-                    raise RuntimeError(
-                        f"H5 field `{name}` has {out.ndim} dimensions instead of {len(dims)}."
+                    printx(
+                        f"H5 field `{name}` has {out.ndim} dimensions; expected {len(dims)}.",
+                        color="grey",
                     )
+                    return None
             if dtype is not None:
                 out = out.astype(dtype)
             return out
@@ -131,12 +131,13 @@ class HDF5Operator(IOFileOperator):
 Scalar = Dim("scalar", static_size=1).with_size()
 
 
+@dataclasses.dataclass
 class NetCDFOperator(IOFileOperator):
-    ds: nc.Dataset
+    def __post_init__(self) -> None:
+        self.ds = nc.Dataset(self.f_path, mode=self.mode)
 
-    def __init__(self, io_file_path: str, mode: Literal["a", "r", "w"]) -> None:
-        super().__init__(io_file_path)
-        self.ds = nc.Dataset(io_file_path, mode=mode)
+    def __del__(self) -> None:
+        self.ds.close()
 
     @property
     def field_names(self) -> tuple[str, ...]:
@@ -164,9 +165,12 @@ class NetCDFOperator(IOFileOperator):
 
             if dims is not None:
                 if out.ndim != len(dims):
-                    raise RuntimeError(
-                        f"H5 field `{name}` has {out.ndim} dimensions instead of {len(dims)}."
+                    printx(
+                        f"NetCDF field `{name}` has {out.ndim} dimensions; expected {len(dims)}.",
+                        color="grey",
                     )
+                    return None
+
             if dtype is not None:
                 out = out.astype(dtype)
 
@@ -211,8 +215,8 @@ class NetCDFOperator(IOFileOperator):
 @contextmanager
 def io_file_operator(
     io_file_path: Optional[str], mode: Literal["a", "r", "w"]
-) -> Iterator[Optional[IOFileOperator]]:
-    op: Optional[IOFileOperator] = None
+) -> Iterator[IOFileOperator]:
+    op = DUMMY_IO_FILE_OP
 
     if io_file_path is not None:
         f_path = os.path.abspath(io_file_path)
@@ -235,5 +239,5 @@ def io_file_operator(
     try:
         yield op
     finally:
-        if op is not None:
+        if op != DUMMY_IO_FILE_OP:
             del op

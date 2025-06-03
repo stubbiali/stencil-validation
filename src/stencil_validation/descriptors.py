@@ -44,7 +44,6 @@ class Descriptor:
     default_io_file_path: Optional[str] = None
     default_value: Optional[Any] = None
     dtype_name: Literal["bool", "float", "int"] = "float"
-    io_file_path: Optional[str] = None
     io_name: Optional[str] = None
     io_name_write: Optional[str] = None
     random_value_range: Optional[tuple[Any, Any]] = None
@@ -54,9 +53,9 @@ class Descriptor:
         self.io_name_write = self.io_name_write or self.io_name
 
     def concretize(
-        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
-        return ConcretizedDescriptor.from_config_and_file(self, config, io_file_op)
+        return ConcretizedDescriptor.from_config_and_file(self, config, io_file_paths)
 
     def get_default_value(self, config: Config) -> Any:
         return self.default_value
@@ -94,28 +93,25 @@ class ConcretizedDescriptor:
 
     @classmethod
     def from_config_and_file(
-        cls, desc: Descriptor, config: Config, io_file_op: Optional[IOFileOperator] = None
+        cls, desc: Descriptor, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
         printx(f"Concretization of {desc}:")
 
         value = None
 
         if desc.io_name is not None:
-            if desc.io_file_path is not None:
-                with io_file_operator(desc.io_file_path, "r") as io_file_op:
-                    if io_file_op is not None:
-                        if (value := desc.read_value(config, io_file_op)) is None:
-                            printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
-
-            if value is None and io_file_op is not None:
-                if (value := desc.read_value(config, io_file_op)) is None:
-                    printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+            io_file_paths = io_file_paths or []
+            for io_file_path in io_file_paths:
+                with io_file_operator(io_file_path, "r") as io_file_op:
+                    if (value := desc.read_value(config, io_file_op)) is None:
+                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+                    else:
+                        break
 
             if value is None and desc.default_io_file_path is not None:
                 with io_file_operator(desc.default_io_file_path, "r") as io_file_op:
-                    if io_file_op is not None:
-                        if (value := desc.read_value(config, io_file_op)) is None:
-                            printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+                    if (value := desc.read_value(config, io_file_op)) is None:
+                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
 
         if value is not None:
             printx(f"  * `io_name` found in `{io_file_op.f_path}`")  # type: ignore[union-attr]
@@ -130,9 +126,8 @@ class ConcretizedDescriptor:
 
         return cls(desc, value)
 
-    def to_file(self, config: Config, io_file_op: Optional[IOFileOperator] = None) -> None:
-        if io_file_op is not None:
-            self.desc.write_value(self.value, config, io_file_op)
+    def to_file(self, config: Config, io_file_op: IOFileOperator) -> None:
+        self.desc.write_value(self.value, config, io_file_op)
 
 
 @dataclasses.dataclass
@@ -274,9 +269,9 @@ class Field(BaseField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
-        cdesc = super().concretize(config, io_file_op)
+        cdesc = super().concretize(config, io_file_paths)
         assert cdesc.value.shape == self.get_storage_shape(config)
         return cdesc
 
@@ -405,13 +400,13 @@ class CompositeField(BaseField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_op: Optional[IOFileOperator] = None
+        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
     ) -> ConcretizedDescriptor:
         value = np.zeros(self.get_storage_shape(config), dtype=self.get_dtype(config))
         value_without_padding = value[self.get_storage_index_slices(config)]
 
         for dims, field in self.fields_map.items():
-            rhs = field.concretize(config, io_file_op).value
+            rhs = field.concretize(config, io_file_paths).value
             index_slices = tuple(dim.with_size(config).get_index_slice() for dim in dims)
             value_without_padding[index_slices] = to_numpy(rhs)
 
@@ -439,16 +434,16 @@ ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
 
 
 def concretize(
-    desc_dict: DescriptorDict, config: Config, io_file_op: Optional[IOFileOperator] = None
+    desc_dict: DescriptorDict, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
 ) -> ConcretizedDescriptorDict:
     cdesc_dict = {}
     for key, desc in desc_dict.items():
-        cdesc_dict[key] = desc.concretize(config, io_file_op)
+        cdesc_dict[key] = desc.concretize(config, io_file_paths)
     return cdesc_dict
 
 
 def to_file(
-    cdesc_dict: ConcretizedDescriptorDict, config: Config, io_file_op: Optional[IOFileOperator]
+    cdesc_dict: ConcretizedDescriptorDict, config: Config, io_file_op: IOFileOperator
 ) -> None:
     for cdesc in cdesc_dict.values():
         cdesc.to_file(config, io_file_op)
