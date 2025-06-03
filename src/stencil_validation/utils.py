@@ -23,6 +23,15 @@ from typing import Optional
 from stencil_validation.settings import GLOBAL_SETTINGS
 
 
-def printx(msg: str, end: Optional[str] = None, flush: bool = False) -> None:
+ANSI_ESCAPE_SEQUENCES = {
+    "end": "\033[0m",
+    "style": {"bold": "\033[1m", "italic": "\033[3m"},
+    "colors": {"grey": "\033[90m", "red": "\033[91m", "green": "\033[92m"},
+}
+
+
+def printx(msg: str, end: Optional[str] = None, flush: bool = False, color: str = None) -> None:
     if GLOBAL_SETTINGS.verbose:
+        if color in ANSI_ESCAPE_SEQUENCES["colors"]:
+            msg = ANSI_ESCAPE_SEQUENCES["colors"][color] + msg + ANSI_ESCAPE_SEQUENCES["end"]
         print(msg, end=end, flush=flush)
