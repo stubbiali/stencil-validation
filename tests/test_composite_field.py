@@ -100,8 +100,7 @@ def test(field_cls: type[Field], composite_field_cls: type[CompositeField]):
         composite_field = composite_field_cls(
             dims=(IJ, K, D2), fields_map={(IJ, K, D2[0]): field0, (IJ, K, D2[1]): field1}
         )
-        with io_file_operator(file_path, mode="r") as io_file_op:
-            composite_value = composite_field.concretize(config, io_file_op).value
+        composite_value = composite_field.concretize(config, io_file_paths=(file_path,)).value
 
     np.testing.assert_allclose(composite_value[..., 0], cdesc_dict["field0"].value)
     np.testing.assert_allclose(composite_value[..., 1], cdesc_dict["field1"].value)
