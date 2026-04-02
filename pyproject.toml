@@ -38,7 +38,7 @@ dependencies = [
     'fmodpy',
     'gt4py>=1.0.4',
     'h5py>=3.0',
-    'ifs_physics_common @ git+https://github.com/gvollenweider/ifs-physics-common.git@main',
+    'ifs_physics_common @ git+https://github.com/stubbiali/ifs-physics-common.git@main',
     'jinja2',
     'netcdf4',
     'numpy>=1.22,<2.0',
