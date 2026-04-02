@@ -36,7 +36,7 @@ classifiers = [
 dependencies = [
     'click',
     'fmodpy',
-    'gt4py[dace] @ git+https://github.com/stubbiali/gt4py.git@loops-over-data-dims',
+    'gt4py>=1.0.4',
     'h5py>=3.0',
     'ifs_physics_common @ git+https://github.com/gvollenweider/ifs-physics-common.git@main',
     'jinja2',
