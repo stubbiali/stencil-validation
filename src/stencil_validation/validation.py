@@ -59,8 +59,17 @@ def compare_io_files(
                 print(f"   - rtol: {rtol:.1E}\n")
 
                 common_keys = sorted(
-                    set(src_file_op.field_names).intersection(set(trg_file_op.field_names))
+                    (src_keys := {*src_file_op.field_names}).intersection(
+                        trg_keys := {*trg_file_op.field_names}
+                    )
                 )
+                if src_keys_only := (src_keys - {*common_keys}):
+                    print(f"   - fields found only in source file: {','.join(src_keys_only)}")
+                if trg_keys_only := (trg_keys - {*common_keys}):
+                    print(f"   - fields found only in target file: {','.join(trg_keys_only)}")
+                if src_keys_only or trg_keys_only:
+                    print("")
+
                 max_key_len = max(len(key) for key in common_keys)
                 for key in common_keys:
                     src_field = src_file_op.get_field(key)[  # type: ignore[index]
