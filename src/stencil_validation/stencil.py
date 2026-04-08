@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 def get_stencil_id(name: str, version: str) -> str:
-    return f"{name}__{version}" if name != "" and version != "" else ""
+    return f"{name}__{version}" if name and version else ""
 
 
 def decode_stencil_id(stencil_id: str) -> tuple[str, str]:
@@ -55,7 +55,7 @@ class MetaStencil(type):
             if stencil_id in cls.COLLECTION:
                 raise KeyError(f"Two stencils registered under `{stencil_id}`.")
             out = super().__new__(cls, cls_name, bases, dct)
-            if stencil_id != "":
+            if stencil_id:
                 cls.COLLECTION[stencil_id] = out  # type: ignore[index]
             return out
 

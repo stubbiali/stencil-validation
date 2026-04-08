@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import os
 from typing import TYPE_CHECKING
 
@@ -8,10 +9,12 @@ from stencil_validation.stencil_fortran.descriptors import FortranField
 from stencil_validation.stencil_fortran.stencil import FortranStencil, MetaFortranStencil
 
 if TYPE_CHECKING:
+    from typing import ClassVar
+
     from stencil_validation.descriptors import DescriptorDict
 
 
-IJK_ARGS = lambda dtype_name="float": {
+IJK_ARGS = lambda dtype_name="float": {  # noqa: E731 (lambda-assignment)
     "dims": (IJ, K),
     "dtype_name": dtype_name,
     "io_dims": (K, IJ),
@@ -22,7 +25,7 @@ class _(FortranStencil, metaclass=MetaFortranStencil):
     name: str = "math_functions"
     version: str = "demo"
     template_file_path: str = os.path.join(os.path.dirname(__file__), "math_functions.F90.in")
-    template_var_info: dict[str, dict] = {
+    template_var_info: ClassVar[dict[str, dict]] = {
         "nlev": {"type": int},
         "nlon": {"type": int},
         "precision": {"type": str},

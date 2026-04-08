@@ -108,9 +108,11 @@ def compare_io_files(
 
                     print(
                         f"   {key:{max_key_len}s}:"
-                        f"\033[9{2 if abs_diff_max < atol else 1}m max abs diff = {abs_diff_max:.5E} "
+                        f"\033[9{2 if abs_diff_max < atol else 1}m "
+                        f"max abs diff = {abs_diff_max:.5E} "
                         f"({f'{freq_atol:.2f}'.zfill(5)} %)\033[00m,"
-                        f"\033[9{2 if rel_diff_max < rtol else 1}m max rel diff = {rel_diff_max:.5E} "
+                        f"\033[9{2 if rel_diff_max < rtol else 1}m "
+                        f"max rel diff = {rel_diff_max:.5E} "
                         f"({f'{freq_rtol:.2f}'.zfill(5)} %)\033[00m,"
                         f"\033[9{2 if allclose else 1}m allclose = {allclose} "
                         f"({f'{freq_close:.2f}'.zfill(5)} %)\033[00m"

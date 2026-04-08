@@ -54,8 +54,7 @@ class IOFileOperator:
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
         units: Optional[str] = None,
-    ) -> Optional[NDArray]:
-        return None
+    ) -> Optional[NDArray]: ...
 
     def set_field(
         self,
@@ -64,8 +63,7 @@ class IOFileOperator:
         dims: Optional[Sequence[SizedDim]] = None,
         dtype: Optional[DTypeLike] = None,
         units: Optional[str] = None,
-    ) -> None:
-        pass
+    ) -> None: ...
 
 
 DUMMY_IO_FILE_OP = IOFileOperator()
@@ -227,7 +225,7 @@ def io_file_operator(
         if mode == "r" and not os.path.exists(f_path):
             printx(f"The file `{f_path}` does not exist.")
         else:
-            parent_dir, f_name = f_path.rsplit("/", maxsplit=1)
+            parent_dir, _ = f_path.rsplit("/", maxsplit=1)
             os.makedirs(parent_dir, exist_ok=True)
 
             f_ext = os.path.splitext(f_path)[1][1:]

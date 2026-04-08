@@ -31,7 +31,7 @@ from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, pri
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FunctionType
-    from typing import Optional
+    from typing import ClassVar, Optional
 
     from gt4py.cartesian.stencil_object import StencilObject
 
@@ -48,7 +48,7 @@ class MetaGT4PyStencil(MetaStencil):
 
 class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
     def_func: FunctionType
-    external_info: dict[str, dict] = {}
+    external_info: ClassVar[dict[str, dict]] = {}
 
     stencil_obj: StencilObject
 
@@ -160,4 +160,5 @@ def get_gt4py_stencil(
     return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]
 
 
-print_gt4py_stencil_list = lambda: print_stencil_list(GT4PY_STENCIL_COLLECTION)
+def print_gt4py_stencil_list() -> None:
+    print_stencil_list(GT4PY_STENCIL_COLLECTION)

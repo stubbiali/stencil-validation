@@ -130,6 +130,9 @@ class IndexedDim:
     def __neg__(self) -> IndexedDim:
         return IndexedDim(-self.dim, self.index)
 
+    def __hash__(self) -> int:
+        return hash((self.dim, self.index))
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Dim):
             return self.dim == other
@@ -170,7 +173,7 @@ if TYPE_CHECKING:
 
 
 ExpandedDim = Dim("ExpandedDim")
-I = Dim("I")
+I = Dim("I")  # noqa: E741 (ambiguous-variable-name)
 IJ = Dim("IJ")
 J = Dim("J")
 K = Dim("K")

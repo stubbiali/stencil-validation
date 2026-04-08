@@ -28,7 +28,6 @@ import numpy as np
 
 from stencil_validation.dims import ExpandedDim
 from stencil_validation.iox import io_file_operator
-from stencil_validation.typingx import BoolType, FloatType, IntType
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
@@ -39,6 +38,7 @@ if TYPE_CHECKING:
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim, GenericDim, SizedDim
     from stencil_validation.iox import IOFileOperator
+    from stencil_validation.typingx import BoolType, FloatType, IntType
 
 
 @dataclasses.dataclass
@@ -132,14 +132,18 @@ class ConcretizedDescriptor:
         self.desc.write_value(self.value, config, io_file_op)
 
 
+RNG: np.random.Generator = np.random.default_rng(seed=42)
+
+
 @dataclasses.dataclass
 class Bool(Descriptor):
     default_value: Optional[BoolType] = None
     dtype_name: Literal["bool"] = "bool"
 
-    def get_random_value(self, config: Config) -> BoolType:
+    @staticmethod
+    def get_random_value(config: Config) -> BoolType:
         return config.gt4py_config.dtypes.bool(  # type: ignore[no-any-return]
-            np.random.rand() < 0.5
+            RNG.random() < 0.5
         )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
@@ -173,7 +177,7 @@ class Int(Descriptor):
 
     def get_random_value(self, config: Config) -> IntType:
         low, high = self.random_value_range or (0, 1)
-        return np.random.randint(  # type: ignore[return-value]
+        return RNG.integers(  # type: ignore[return-value]
             low=low, high=high, dtype=config.gt4py_config.dtypes.int
         )
 
@@ -206,7 +210,7 @@ class Float(Descriptor):
     def get_random_value(self, config: Config) -> FloatType:
         low, high = self.random_value_range or (0, 1)
         return config.gt4py_config.dtypes.float(  # type: ignore[no-any-return]
-            low + (high - low) * np.random.rand()
+            low + (high - low) * RNG.random()
         )
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
@@ -291,7 +295,7 @@ class Field(BaseField):
     def get_random_value(self, config: Config) -> NDArray:
         low, high = self.random_value_range or (0, 1)
         return np.asarray(
-            low + (high - low) * np.random.rand(*self.get_storage_shape(config)),
+            low + (high - low) * RNG.random(self.get_storage_shape(config)),
             dtype=self.get_dtype(config),
         )
 
@@ -359,7 +363,7 @@ class Field(BaseField):
         flip_axes = []
         layout_map = []
         ds_dims = []
-        for i, dim in enumerate(self.io_dims):
+        for dim in self.io_dims:
             if dim in io_dims_map_filtered:
                 j = io_dims_map_filtered.index(dim)
             elif -dim in io_dims_map_filtered:

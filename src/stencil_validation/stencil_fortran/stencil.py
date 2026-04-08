@@ -31,7 +31,7 @@ from stencil_validation.stencil_fortran.utils import compile_subroutine, render_
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FunctionType
-    from typing import Any, Literal, Optional
+    from typing import Any, ClassVar, Literal, Optional
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict
@@ -46,7 +46,7 @@ class MetaFortranStencil(MetaStencil):
 
 class FortranStencil(Stencil, metaclass=MetaFortranStencil):
     template_file_path: str = ""
-    template_var_info: dict[str, dict] = {}
+    template_var_info: ClassVar[dict[str, dict]] = {}
 
     def __call__(
         self,
@@ -114,7 +114,8 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
                 for _ in range(num_runs):
                     _ = fn(**in_args)
             print(
-                f"Average execution time over {num_runs} runs: {timer.get_time(self.name, units='ms') / num_runs:.3f} ms."
+                f"Average execution time over {num_runs} runs: "
+                f"{timer.get_time(self.name, units='ms') / num_runs:.3f} ms."
             )
 
         return out_cdesc_dict
@@ -124,4 +125,5 @@ def get_fortran_stencil(name: str, version: str, config: Config) -> FortranStenc
     return FORTRAN_STENCIL_COLLECTION[get_stencil_id(name, version)](config)  # type: ignore[no-any-return]
 
 
-print_fortran_stencil_list = lambda: print_stencil_list(FORTRAN_STENCIL_COLLECTION)
+def print_fortran_stencil_list() -> None:
+    print_stencil_list(FORTRAN_STENCIL_COLLECTION)

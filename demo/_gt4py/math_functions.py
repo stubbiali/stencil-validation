@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from gt4py.cartesian.gtscript import Field
+from gt4py.cartesian.gtscript import PARALLEL, Field, computation, cos, exp, interval, sin, sqrt
 
-from stencil_validation.dims import ExpandedDim, I, IJ, J, K
+from stencil_validation.dims import IJ, ExpandedDim, I, J, K
 from stencil_validation.stencil_gt4py.descriptors import GT4PyField
 from stencil_validation.stencil_gt4py.stencil import GT4PyStencil, MetaGT4PyStencil
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from stencil_validation.descriptors import DescriptorDict
 
 
-IJK_ARGS = lambda dtype_name="float": {
+IJK_ARGS = lambda dtype_name="float": {  # noqa: E731 (lambda-assignment)
     "dims": (I, J, K),
     "dtype_name": dtype_name,
     "io_dims": (K, IJ),
