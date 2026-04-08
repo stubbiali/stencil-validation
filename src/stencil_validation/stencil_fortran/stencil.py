@@ -21,8 +21,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.utils.timing import timing
 import numpy as np
+
+from ifs_physics_common.utils.timing import timing
 
 from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list

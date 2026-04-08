@@ -19,12 +19,12 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
 import dataclasses
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.utils.numpyx import to_numpy
 import numpy as np
+
+from ifs_physics_common.utils.numpyx import to_numpy
 
 from stencil_validation.dims import ExpandedDim
 from stencil_validation.iox import io_file_operator

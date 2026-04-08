@@ -136,7 +136,7 @@ section-order = [
     'future',
     'standard-library',
     'third-party',
-    'gt4py',
+    'third-party-dev',
     'first-party',
     'testing-third-party',
     'testing-first-party',
@@ -145,7 +145,7 @@ section-order = [
 split-on-trailing-comma = false
 
 [tool.ruff.lint.isort.sections]
-gt4py = ['gt4py']
+third-party-dev = ['gt4py', 'ifs_physics_common']
 testing-first-party = ['tests']
 testing-third-party = ['pytest']
 
