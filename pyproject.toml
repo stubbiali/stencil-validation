@@ -42,6 +42,7 @@ dependencies = [
     'jinja2',
     'netcdf4',
     'numpy>=1.22,<2.0',
+    'pint>=0.7'
 ]
 description = 'A Python framework to validate multiple implementations of stencil kernels.'
 keywords = ['fortran', 'python', 'stencils', 'validation']
@@ -58,7 +59,6 @@ dev = [
     'ipdb',
     'ipython==8.22.0',  # note(stubbiali): required to make ipdb work
     'mypy',
-    'pint>=0.7',
     'pre-commit',
 ]
 test = ['pytest']
