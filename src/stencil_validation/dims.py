@@ -173,7 +173,7 @@ if TYPE_CHECKING:
 
 
 ExpandedDim = Dim("ExpandedDim")
-I = Dim("I")  # noqa: E741 (ambiguous-variable-name)
+I = Dim("I")  # noqa: E741
 IJ = Dim("IJ")
 J = Dim("J")
 K = Dim("K")

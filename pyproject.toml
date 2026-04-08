@@ -58,7 +58,7 @@ requires-python = '>=3.10,<3.15'  # note(stubbiali): same as pmap
 [project.optional-dependencies]
 dev = [
     'ipdb',
-    'ipython==8.22.0',  # note(stubbiali): required to make ipdb work
+    'ipython',
     'mypy',
     'pre-commit',
     'ruff==0.14.13',  # note(stubbiali): same as pmap
