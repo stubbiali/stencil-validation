@@ -19,11 +19,10 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
+import abc
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.framework.stencil import compile_stencil, stencil_collection
-from ifs_physics_common.utils.timing import timing
+import ifs_physics_common
 
 from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
     from types import FunctionType
     from typing import ClassVar, Optional
 
-    from gt4py.cartesian.stencil_object import StencilObject
+    import gt4py.cartesian as gtc
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict, DescriptorDict
@@ -50,7 +49,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
     def_func: FunctionType
     external_info: ClassVar[dict[str, dict]] = {}
 
-    stencil_obj: StencilObject
+    stencil_obj: gtc.StencilObject
 
     def __init__(self, config: Config, externals: Optional[dict] = None) -> None:
         super().__init__(config)
@@ -77,8 +76,10 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
                     raise RuntimeError(f"No value specified for external symbol `{ext_name}`.")
 
         stencil_id = get_stencil_id(self.name, self.version)
-        stencil_collection(stencil_id)(self.def_func.__func__)
-        self.stencil_obj = compile_stencil(stencil_id, self.config.gt4py_config, externals)
+        ifs_physics_common.stencil_collection(stencil_id)(self.def_func.__func__)
+        self.stencil_obj = ifs_physics_common.compile_stencil(
+            stencil_id, self.config.gt4py_config, externals
+        )
 
     @property
     def inout_descriptors(self) -> DescriptorDict:
@@ -89,11 +90,11 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         return {}
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def origin(self) -> tuple[int, int, int]: ...
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def domain(self) -> tuple[int, int, int]: ...
 
     def process_cdesc_dicts(
@@ -136,7 +137,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 
         num_runs = num_runs or 0
         if num_runs > 0:
-            with timing(self.name) as timer:
+            with ifs_physics_common.timing(self.name) as timer:
                 for _ in range(num_runs):
                     self.stencil_obj(
                         **in_args,

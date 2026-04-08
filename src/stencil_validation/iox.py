@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+import contextlib
 import dataclasses
 import os
 from typing import TYPE_CHECKING
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
     from typing import Literal, Optional
 
-    from numpy.typing import DTypeLike, NDArray
+    import numpy.typing as npt
 
 
 @dataclasses.dataclass
@@ -52,16 +52,16 @@ class IOFileOperator:
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
-    ) -> Optional[NDArray]: ...
+    ) -> Optional[npt.NDArray]: ...
 
     def set_field(
         self,
-        data: NDArray,
+        data: npt.NDArray,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
     ) -> None: ...
 
@@ -85,9 +85,9 @@ class HDF5Operator(IOFileOperator):
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
-    ) -> Optional[NDArray]:
+    ) -> Optional[npt.NDArray]:
         ds = self.f.get(name, None)
         if ds is None:
             return None
@@ -106,10 +106,10 @@ class HDF5Operator(IOFileOperator):
 
     def set_field(
         self,
-        data: NDArray,
+        data: npt.NDArray,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
     ) -> None:
         dtype = dtype or data.dtype
@@ -148,9 +148,9 @@ class NetCDFOperator(IOFileOperator):
         self,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
-    ) -> Optional[NDArray]:
+    ) -> Optional[npt.NDArray]:
         if name not in self.ds.variables:
             return None
         else:
@@ -179,10 +179,10 @@ class NetCDFOperator(IOFileOperator):
 
     def set_field(
         self,
-        data: NDArray,
+        data: npt.NDArray,
         name: str,
         dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[DTypeLike] = None,
+        dtype: Optional[npt.DTypeLike] = None,
         units: Optional[str] = None,
     ) -> None:
         dtype = dtype or data.dtype
@@ -213,7 +213,7 @@ class NetCDFOperator(IOFileOperator):
             self.ds[name].units = units
 
 
-@contextmanager
+@contextlib.contextmanager
 def io_file_operator(
     io_file_path: Optional[str], mode: Literal["a", "r", "w"]
 ) -> Iterator[IOFileOperator]:

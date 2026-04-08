@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import re
 
-from pint.registry import UnitRegistry
+import pint
 
-UNIT_REGISTRY = UnitRegistry()
+UNIT_REGISTRY = pint.UnitRegistry()
 
 
 def parse_units(units: str) -> str:

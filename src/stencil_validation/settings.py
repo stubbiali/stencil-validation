@@ -19,11 +19,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import dataclasses
 import os
 
 
-@dataclass(frozen=False)
+@dataclasses.dataclass(frozen=False)
 class GlobalSettings:
     project_root: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     verbose: bool = False

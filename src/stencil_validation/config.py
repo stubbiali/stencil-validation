@@ -19,20 +19,24 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import dataclasses
 from typing import TYPE_CHECKING
 
-from ifs_physics_common.framework.config import GT4PyConfig
+import ifs_physics_common
 
 if TYPE_CHECKING:
     from typing import Literal
 
 
-@dataclass
+@dataclasses.dataclass
 class Config:
-    grid_shape: dict[str, int] = field(default_factory=lambda: {"I": 1, "IJ": 1, "J": 1, "K": 1})
-    data_shape: dict[str, int] = field(default_factory=dict)
-    gt4py_config: GT4PyConfig = field(default_factory=lambda: GT4PyConfig(backend="numpy"))
+    grid_shape: dict[str, int] = dataclasses.field(
+        default_factory=lambda: {"I": 1, "IJ": 1, "J": 1, "K": 1}
+    )
+    data_shape: dict[str, int] = dataclasses.field(default_factory=dict)
+    gt4py_config: ifs_physics_common.GT4PyConfig = dataclasses.field(
+        default_factory=lambda: ifs_physics_common.GT4PyConfig(backend="numpy")
+    )
     precision: Literal["double", "single"] = "double"
 
     @property

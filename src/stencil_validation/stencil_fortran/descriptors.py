@@ -28,24 +28,24 @@ from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor
 if TYPE_CHECKING:
     from typing import Optional
 
-    from numpy.typing import NDArray
+    import numpy.typing as npt
 
     from stencil_validation.config import Config
     from stencil_validation.iox import IOFileOperator
 
 
 class FortranField(Field):
-    def get_default_value(self, config: Config) -> Optional[NDArray]:
+    def get_default_value(self, config: Config) -> Optional[npt.NDArray]:
         if (value := super().get_default_value(config)) is not None:
             return np.asfortranarray(value)
         else:
             return value
 
-    def get_random_value(self, config: Config) -> NDArray:
+    def get_random_value(self, config: Config) -> npt.NDArray:
         value = super().get_random_value(config)
         return np.asfortranarray(value)
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[npt.NDArray]:
         if (value := super().read_value(config, io_file_op)) is not None:
             return np.asfortranarray(value)
         else:

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ifs_physics_common.utils.timing import timing
+import ifs_physics_common
 
 from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
@@ -111,7 +111,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
         num_runs = num_runs or 0
         if num_runs > 0:
-            with timing(self.name) as timer:
+            with ifs_physics_common.timing(self.name) as timer:
                 for _ in range(num_runs):
                     _ = fn(**in_args)
             print(

@@ -19,12 +19,13 @@
 
 from __future__ import annotations
 
+import abc
 import dataclasses
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ifs_physics_common.utils.numpyx import to_numpy
+import ifs_physics_common
 
 from stencil_validation.dims import ExpandedDim
 from stencil_validation.iox import io_file_operator
@@ -70,15 +71,15 @@ class Descriptor:
             init_kwargs[key] = value
         return self.__class__(**init_kwargs)
 
-    @abstractmethod
+    @abc.abstractmethod
     def get_random_value(self, config: Config) -> Any:
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[Any]:
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def write_value(self, value: Any, config: Config, io_file_op: IOFileOperator) -> None:
         pass
 
@@ -140,8 +141,7 @@ class Bool(Descriptor):
     default_value: Optional[BoolType] = None
     dtype_name: Literal["bool"] = "bool"
 
-    @staticmethod
-    def get_random_value(config: Config) -> BoolType:
+    def get_random_value(self, config: Config) -> BoolType:  # noqa: PLR6301
         return config.gt4py_config.dtypes.bool(  # type: ignore[no-any-return]
             RNG.random() < 0.5
         )
@@ -354,7 +354,7 @@ class Field(BaseField):
         return out
 
     def write_value(self, value: NDArray, config: Config, io_file_op: IOFileOperator) -> None:
-        data = to_numpy(value[self.get_storage_index_slices(config)])
+        data = ifs_physics_common.to_numpy(value[self.get_storage_index_slices(config)])
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if dim != ExpandedDim]
         squeeze_axes = tuple(i for i, dim in enumerate(self.io_dims_map) if dim == ExpandedDim)
@@ -417,7 +417,7 @@ class CompositeField(BaseField):
         for dims, field in self.fields_map.items():
             rhs = field.concretize(config, io_file_paths).value
             index_slices = tuple(dim.with_size(config).get_index_slice() for dim in dims)
-            value_without_padding[index_slices] = to_numpy(rhs)
+            value_without_padding[index_slices] = ifs_physics_common.to_numpy(rhs)
 
         return ConcretizedDescriptor(self, value)
 

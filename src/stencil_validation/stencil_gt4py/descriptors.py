@@ -21,14 +21,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from gt4py.storage import from_array
+import gt4py
 
 from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from numpy.typing import NDArray
+    import numpy.typing as npt
 
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim
@@ -54,9 +54,9 @@ class GT4PyField(Field):
         super().__post_init__()
         self.gt_dims = get_gt_dims(self.dims)
 
-    def get_default_value(self, config: Config) -> Optional[NDArray]:
+    def get_default_value(self, config: Config) -> Optional[npt.NDArray]:
         if (value := super().get_default_value(config)) is not None:
-            return from_array(
+            return gt4py.storage.from_array(
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,
@@ -65,18 +65,18 @@ class GT4PyField(Field):
         else:
             return value
 
-    def get_random_value(self, config: Config) -> NDArray:
+    def get_random_value(self, config: Config) -> npt.NDArray:
         value = super().get_random_value(config)
-        return from_array(
+        return gt4py.storage.from_array(
             value,
             dtype=self.get_dtype(config),
             backend=config.gt4py_config.backend,
             dimensions=self.gt_dims,
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[npt.NDArray]:
         if (value := super().read_value(config, io_file_op)) is not None:
-            return from_array(
+            return gt4py.storage.from_array(
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,
@@ -99,7 +99,7 @@ class CompositeGT4PyField(CompositeField):
         value = super().concretize(config, io_file_paths).value
         return ConcretizedDescriptor(
             self,
-            from_array(
+            gt4py.storage.from_array(
                 value,
                 dtype=self.get_dtype(config),
                 backend=config.gt4py_config.backend,

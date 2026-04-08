@@ -25,7 +25,7 @@ import shutil
 from typing import TYPE_CHECKING
 
 import fmodpy
-from jinja2 import Environment, FileSystemLoader
+import jinja2
 
 from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_fortran.settings import (
@@ -73,8 +73,8 @@ def render_subroutine_template(
     if f_ext != "in":
         raise RuntimeError("The extension of the template file should be `.in`.")
 
-    loader = FileSystemLoader(search_path)
-    env = Environment(loader=loader)
+    loader = jinja2.FileSystemLoader(search_path)
+    env = jinja2.Environment(loader=loader)
     template = env.get_template(f_fullname)
     src = template.render(**data)
 

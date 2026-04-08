@@ -19,8 +19,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
+import dataclasses
+import enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from stencil_validation.config import Config
 
 
-class Direction(Enum):
+class Direction(enum.Enum):
     POSITIVE: int = 1
     NEGATIVE: int = -1
 
@@ -38,7 +38,7 @@ def flip(direction: Direction) -> Direction:
     return Direction.NEGATIVE if direction == Direction.POSITIVE else Direction.POSITIVE
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Dim:
     name: str
     offset: float = 0
@@ -104,7 +104,7 @@ class Dim:
             return SizedDim.from_config(self, config)
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class IndexedDim:
     dim: Dim
     index: Union[int, slice]
@@ -145,7 +145,7 @@ class IndexedDim:
         return SizedDim.from_config(self, config)
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class SizedDim:
     dim: Union[Dim, IndexedDim]
     size: int
