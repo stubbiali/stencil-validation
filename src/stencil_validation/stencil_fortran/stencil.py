@@ -32,7 +32,7 @@ from stencil_validation.stencil_fortran.utils import compile_subroutine, render_
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FunctionType
-    from typing import Any, ClassVar, Literal
+    from typing import ClassVar, Literal
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict
@@ -51,7 +51,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
     def __call__(
         self,
-        template_var_values: dict[str, Any] | None = None,
+        template_var_values: dict | None = None,
         in_file_paths: tuple[str, ...] | None = None,
         write_in_file_path: str | None = None,
         out_file_path: str | None = None,
@@ -68,7 +68,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
     def compile(
         self,
-        template_var_values: dict[str, Any],
+        template_var_values: dict,
         compiler_args: list[str] | None = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,

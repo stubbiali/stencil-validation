@@ -36,7 +36,7 @@ from stencil_validation.stencil_fortran.settings import (
 
 if TYPE_CHECKING:
     from types import ModuleType
-    from typing import Any, Literal
+    from typing import Literal
 
 
 def get_cache_id(subroutine_id: str, src: str) -> str:
@@ -49,8 +49,8 @@ def get_cache_id(subroutine_id: str, src: str) -> str:
 def render_subroutine_template(
     subroutine_id: str,
     template_file_path: str,
-    template_var_info: dict[str, dict[str, Any]],
-    template_var_values: dict[str, Any],
+    template_var_info: dict[str, dict],
+    template_var_values: dict,
 ) -> tuple[str, str]:
     f_path = os.path.abspath(template_file_path)
     if not os.path.exists(f_path):
