@@ -15,10 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# === build system requirements
 [build-system]
 build-backend = 'setuptools.build_meta'
 requires = ['setuptools>=65.5.0', 'wheel']
 
+
+# === standard project description options
 [project]
 authors = [
     {name = 'Stefano Ubbiali', email = 'subbiali@phys.ethz.ch'},
@@ -27,11 +30,11 @@ classifiers = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
     'Operating System :: POSIX',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
 ]
 dependencies = [
     'click',
@@ -69,6 +72,7 @@ run_gt4py = 'stencil_validation.stencil_gt4py.run:main'
 
 [project.urls]
 Source = 'https://github.com/stubbiali/stencil-validation.git'
+
 
 # === tool: ruff
 [tool.ruff]
@@ -159,7 +163,7 @@ classmethod-decorators = [
 [tool.ruff.lint.pydocstyle]
 convention = 'google'
 
-# === mypy
+# === tool: mypy
 [tool.mypy]
 check_untyped_defs = true
 # set to `true` once cupy support typing
@@ -184,7 +188,8 @@ ignore_missing_imports = true
 module = 'h5py'
 ignore_missing_imports = true
 
-# === pytest
+
+# === tool: pytest
 [tool.pytest.ini_options]
 addopts = ['--import-mode=importlib', '-v']
 console_output_style = 'count'
@@ -192,7 +197,8 @@ filterwarnings = ['ignore::DeprecationWarning']
 pythonpath = ['src']
 testpaths = ['tests']
 
-# === setuptools
+
+# === tool: setuptools
 [tool.setuptools]
 platforms = ['Linux', 'Mac']
 
