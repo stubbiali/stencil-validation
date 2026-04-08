@@ -26,8 +26,6 @@ import numpy as np
 from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     import numpy.typing as npt
 
     from stencil_validation.config import Config
@@ -35,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class FortranField(Field):
-    def get_default_value(self, config: Config) -> Optional[npt.NDArray]:
+    def get_default_value(self, config: Config) -> npt.NDArray | None:
         if (value := super().get_default_value(config)) is not None:
             return np.asfortranarray(value)
         else:
@@ -45,7 +43,7 @@ class FortranField(Field):
         value = super().get_random_value(config)
         return np.asfortranarray(value)
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[npt.NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> npt.NDArray | None:
         if (value := super().read_value(config, io_file_op)) is not None:
             return np.asfortranarray(value)
         else:
@@ -59,7 +57,7 @@ class CompositeFortranField(CompositeField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        self, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         value = super().concretize(config, io_file_paths).value
         return ConcretizedDescriptor(self, np.asfortranarray(value))

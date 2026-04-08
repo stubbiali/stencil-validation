@@ -19,8 +19,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from stencil_validation.settings import GLOBAL_SETTINGS
 
 ANSI_ESCAPE_SEQUENCES = {
@@ -30,9 +28,7 @@ ANSI_ESCAPE_SEQUENCES = {
 }
 
 
-def printx(
-    msg: str, end: Optional[str] = None, flush: bool = False, color: Optional[str] = None
-) -> None:
+def printx(msg: str, end: str | None = None, flush: bool = False, color: str | None = None) -> None:
     if GLOBAL_SETTINGS.verbose:
         if color in ANSI_ESCAPE_SEQUENCES["colors"]:
             msg = ANSI_ESCAPE_SEQUENCES["colors"][color] + msg + ANSI_ESCAPE_SEQUENCES["end"]

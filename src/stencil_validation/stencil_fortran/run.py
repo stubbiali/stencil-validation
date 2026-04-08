@@ -32,7 +32,7 @@ from stencil_validation.stencil_fortran.stencil import (
 )
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional
+    from typing import Literal
 
 
 def run(
@@ -42,12 +42,12 @@ def run(
     data_shape: dict[str, int],
     precision: Literal["double", "single"],
     imports: tuple[str, ...],
-    in_file_paths: Optional[tuple[str, ...]],
-    write_in_file_path: Optional[str],
-    out_file_path: Optional[str],
+    in_file_paths: tuple[str, ...] | None,
+    write_in_file_path: str | None,
+    out_file_path: str | None,
     data: dict,
     opt_level: Literal[0, 1, 2, 3],
-    num_runs: Optional[int],
+    num_runs: int | None,
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:

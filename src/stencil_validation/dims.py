@@ -24,7 +24,7 @@ import enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Optional, Union
+    from typing import Union
 
     from stencil_validation.config import Config
 
@@ -43,7 +43,7 @@ class Dim:
     name: str
     offset: float = 0
     direction: Direction = Direction.POSITIVE
-    static_size: Optional[int] = None
+    static_size: int | None = None
 
     # the following attributes ensure better inter-operability with IndexedDim
     index: None = None
@@ -80,7 +80,7 @@ class Dim:
         else:
             return False
 
-    def __getitem__(self, index: Union[int, slice]) -> IndexedDim:
+    def __getitem__(self, index: int | slice) -> IndexedDim:
         return IndexedDim(self, index)
 
     def __hash__(self) -> int:
@@ -96,7 +96,7 @@ class Dim:
         else:
             return f"-{self.name}" if self.direction == Direction.NEGATIVE else f"{self.name}"
 
-    def with_size(self, config: Optional[Config] = None) -> SizedDim:
+    def with_size(self, config: Config | None = None) -> SizedDim:
         if config is None:
             assert self.static_size is not None
             return SizedDim(self, self.static_size)
@@ -107,7 +107,7 @@ class Dim:
 @dataclasses.dataclass(frozen=True)
 class IndexedDim:
     dim: Dim
-    index: Union[int, slice]
+    index: int | slice
 
     def __post_init__(self) -> None:
         if isinstance(self.index, slice):
@@ -147,11 +147,11 @@ class IndexedDim:
 
 @dataclasses.dataclass(frozen=True)
 class SizedDim:
-    dim: Union[Dim, IndexedDim]
+    dim: Dim | IndexedDim
     size: int
 
     @classmethod
-    def from_config(cls, dim: Union[Dim, IndexedDim], config: Config) -> SizedDim:
+    def from_config(cls, dim: Dim | IndexedDim, config: Config) -> SizedDim:
         inner_dim = dim.dim if isinstance(dim, IndexedDim) else dim
         size = config.grid_shape.get(
             inner_dim.name, config.data_shape.get(inner_dim.name, inner_dim.static_size)
@@ -162,7 +162,7 @@ class SizedDim:
             size += 1
         return cls(dim, size)
 
-    def get_index_slice(self) -> Union[int, slice]:
+    def get_index_slice(self) -> int | slice:
         return slice(0, self.size) if isinstance(self.dim, Dim) else self.dim.index
 
 

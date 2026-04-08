@@ -32,9 +32,9 @@ from stencil_validation.iox import io_file_operator
 from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Literal, Optional
+    from typing import Any, Iterator, Literal
 
-    from numpy.typing import DTypeLike, NDArray
+    import numpy.typing as npt
 
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim, GenericDim, SizedDim
@@ -44,19 +44,19 @@ if TYPE_CHECKING:
 
 @dataclasses.dataclass
 class Descriptor:
-    default_value: Optional[Any] = None
+    default_value: Any | None = None
     dtype_name: Literal["bool", "float", "int"] = "float"
-    io_file_path: Optional[str] = None
-    io_name: Optional[str] = None
-    io_name_write: Optional[str] = None
-    random_value_range: Optional[tuple[Any, Any]] = None
-    units: Optional[str] = None
+    io_file_path: str | None = None
+    io_name: str | None = None
+    io_name_write: str | None = None
+    random_value_range: tuple[Any, Any] | None = None
+    units: str | None = None
 
     def __post_init__(self) -> None:
         self.io_name_write = self.io_name_write or self.io_name
 
     def concretize(
-        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        self, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         return ConcretizedDescriptor.from_config_and_file(self, config, io_file_paths)
 
@@ -76,7 +76,7 @@ class Descriptor:
         pass
 
     @abc.abstractmethod
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[Any]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Any | None:
         pass
 
     @abc.abstractmethod
@@ -96,7 +96,7 @@ class ConcretizedDescriptor:
 
     @classmethod
     def from_config_and_file(
-        cls, desc: Descriptor, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        cls, desc: Descriptor, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         printx(f"Concretization of {desc}:")
 
@@ -138,7 +138,7 @@ RNG: np.random.Generator = np.random.default_rng(seed=42)
 
 @dataclasses.dataclass
 class Bool(Descriptor):
-    default_value: Optional[BoolType] = None
+    default_value: BoolType | None = None
     dtype_name: Literal["bool"] = "bool"
 
     def get_random_value(self, config: Config) -> BoolType:  # noqa: PLR6301
@@ -146,7 +146,7 @@ class Bool(Descriptor):
             RNG.random() < 0.5
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> BoolType | None:
         value = io_file_op.get_field(
             self.io_name,
             dtype=config.gt4py_config.dtypes.bool,  # type: ignore[arg-type]
@@ -164,11 +164,11 @@ class Bool(Descriptor):
 
 @dataclasses.dataclass
 class Int(Descriptor):
-    default_value: Optional[IntType] = None
+    default_value: IntType | None = None
     dtype_name: Literal["int"] = "int"
-    random_value_range: Optional[tuple[IntType, IntType]] = None
+    random_value_range: tuple[IntType, IntType] | None = None
 
-    def get_default_value(self, config: Config) -> Optional[IntType]:
+    def get_default_value(self, config: Config) -> IntType | None:
         return (
             config.gt4py_config.dtypes.int(self.default_value)
             if self.default_value is not None
@@ -181,7 +181,7 @@ class Int(Descriptor):
             low=low, high=high, dtype=config.gt4py_config.dtypes.int
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[IntType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> IntType | None:
         value = io_file_op.get_field(self.io_name, units=self.units)  # type: ignore[arg-type]
         return config.gt4py_config.dtypes.int(value.item()) if value is not None else None
 
@@ -196,11 +196,11 @@ class Int(Descriptor):
 
 @dataclasses.dataclass
 class Float(Descriptor):
-    default_value: Optional[FloatType] = None
+    default_value: FloatType | None = None
     dtype_name: Literal["float"] = "float"
-    random_value_range: Optional[tuple[FloatType, FloatType]] = None
+    random_value_range: tuple[FloatType, FloatType] | None = None
 
-    def get_default_value(self, config: Config) -> Optional[FloatType]:
+    def get_default_value(self, config: Config) -> FloatType | None:
         return (
             config.gt4py_config.dtypes.float(self.default_value)
             if self.default_value is not None
@@ -213,7 +213,7 @@ class Float(Descriptor):
             low + (high - low) * RNG.random()
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[FloatType]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> FloatType | None:
         value = io_file_op.get_field(self.io_name, units=self.units)  # type: ignore[arg-type]
         return config.gt4py_config.dtypes.float(value.item()) if value is not None else None
 
@@ -243,7 +243,7 @@ class BaseField(Descriptor):
     def origin(self) -> tuple[int, ...]:
         return tuple(max(-p, 0) for p in self.padding)
 
-    def get_dtype(self, config: Config) -> DTypeLike:
+    def get_dtype(self, config: Config) -> npt.DTypeLike:
         return getattr(config.gt4py_config.dtypes, self.dtype_name)  # type: ignore[no-any-return]
 
     def get_sized_dims(self, config: Config) -> Iterator[SizedDim]:
@@ -278,13 +278,13 @@ class Field(BaseField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        self, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         cdesc = super().concretize(config, io_file_paths)
         assert cdesc.value.shape == self.get_storage_shape(config)
         return cdesc
 
-    def get_default_value(self, config: Config) -> Optional[NDArray]:
+    def get_default_value(self, config: Config) -> npt.NDArray | None:
         if self.default_value is not None:
             return np.full(
                 self.get_storage_shape(config), self.default_value, dtype=self.get_dtype(config)
@@ -292,14 +292,14 @@ class Field(BaseField):
         else:
             return None
 
-    def get_random_value(self, config: Config) -> NDArray:
+    def get_random_value(self, config: Config) -> npt.NDArray:
         low, high = self.random_value_range or (0, 1)
         return np.asarray(
             low + (high - low) * RNG.random(self.get_storage_shape(config)),
             dtype=self.get_dtype(config),
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> npt.NDArray | None:
         dtype = self.get_dtype(config)
         value = io_file_op.get_field(
             self.io_name,  # type: ignore[arg-type]
@@ -353,7 +353,7 @@ class Field(BaseField):
 
         return out
 
-    def write_value(self, value: NDArray, config: Config, io_file_op: IOFileOperator) -> None:
+    def write_value(self, value: npt.NDArray, config: Config, io_file_op: IOFileOperator) -> None:
         data = ifs_physics_common.to_numpy(value[self.get_storage_index_slices(config)])
 
         io_dims_map_filtered = [dim for dim in self.io_dims_map if dim != ExpandedDim]
@@ -409,7 +409,7 @@ class CompositeField(BaseField):
         super().__post_init__()
 
     def concretize(
-        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        self, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         value = np.zeros(self.get_storage_shape(config), dtype=self.get_dtype(config))
         value_without_padding = value[self.get_storage_index_slices(config)]
@@ -421,17 +421,17 @@ class CompositeField(BaseField):
 
         return ConcretizedDescriptor(self, value)
 
-    def get_random_value(self, config: Config) -> NDArray:
+    def get_random_value(self, config: Config) -> npt.NDArray:
         raise NotImplementedError(
             "The method `get_random_value` of `CompositeField` should never be called."
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> npt.NDArray | None:
         raise NotImplementedError(
             "The method `read_value` of `CompositeField` should never be called."
         )
 
-    def write_value(self, value: NDArray, config: Config, io_file_op: IOFileOperator) -> None:
+    def write_value(self, value: npt.NDArray, config: Config, io_file_op: IOFileOperator) -> None:
         value_without_padding = value[self.get_storage_index_slices(config)]
         for dims, field in self.fields_map.items():
             index_slices = tuple(dim.with_size(config).get_index_slice() for dim in dims)
@@ -443,7 +443,7 @@ ConcretizedDescriptorDict = dict[str, ConcretizedDescriptor]
 
 
 def concretize(
-    desc_dict: DescriptorDict, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+    desc_dict: DescriptorDict, config: Config, io_file_paths: tuple[str, ...] | None = None
 ) -> ConcretizedDescriptorDict:
     cdesc_dict = {}
     for key, desc in desc_dict.items():

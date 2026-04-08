@@ -26,7 +26,6 @@ from stencil_validation.iox import io_file_operator
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from typing import Optional
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict, DescriptorDict
@@ -85,12 +84,12 @@ class Stencil:
         return desc_dict
 
     def read_args(
-        self, desc_dict: DescriptorDict, file_paths: Optional[tuple[str, ...]]
+        self, desc_dict: DescriptorDict, file_paths: tuple[str, ...] | None
     ) -> ConcretizedDescriptorDict:
         desc_dict = self.inject_io_name(desc_dict)
         return concretize(desc_dict, self.config, file_paths)
 
-    def write_args(self, cdesc_dict: ConcretizedDescriptorDict, file_path: Optional[str]) -> None:
+    def write_args(self, cdesc_dict: ConcretizedDescriptorDict, file_path: str | None) -> None:
         with io_file_operator(file_path, mode="w") as file_op:
             to_file(cdesc_dict, self.config, file_op)
 

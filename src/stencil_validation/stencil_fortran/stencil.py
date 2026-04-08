@@ -32,7 +32,7 @@ from stencil_validation.stencil_fortran.utils import compile_subroutine, render_
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FunctionType
-    from typing import Any, ClassVar, Literal, Optional
+    from typing import Any, ClassVar, Literal
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict
@@ -51,14 +51,14 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
     def __call__(
         self,
-        template_var_values: Optional[dict[str, Any]] = None,
-        in_file_paths: Optional[tuple[str, ...]] = None,
-        write_in_file_path: Optional[str] = None,
-        out_file_path: Optional[str] = None,
-        include_dirs: Optional[list[str]] = None,
+        template_var_values: dict[str, Any] | None = None,
+        in_file_paths: tuple[str, ...] | None = None,
+        write_in_file_path: str | None = None,
+        out_file_path: str | None = None,
+        include_dirs: list[str] | None = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
-        num_runs: Optional[int] = None,
+        num_runs: int | None = None,
     ) -> None:
         fn = self.compile(template_var_values or {}, include_dirs, opt_level, rebuild)
         in_cdesc_dict = self.read_args(self.in_descriptors, in_file_paths)
@@ -69,7 +69,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
     def compile(
         self,
         template_var_values: dict[str, Any],
-        compiler_args: Optional[list[str]] = None,
+        compiler_args: list[str] | None = None,
         opt_level: Literal[0, 1, 2, 3] = 3,
         rebuild: bool = False,
     ) -> FunctionType:
@@ -92,7 +92,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
         return fn  # type: ignore[no-any-return]
 
     def run(
-        self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict, num_runs: Optional[int]
+        self, fn: FunctionType, in_cdesc_dict: ConcretizedDescriptorDict, num_runs: int | None
     ) -> ConcretizedDescriptorDict:
         in_args = {key: cdesc.value for key, cdesc in in_cdesc_dict.items()}
         out_args = fn(**in_args)

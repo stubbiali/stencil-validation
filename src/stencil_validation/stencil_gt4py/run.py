@@ -29,7 +29,7 @@ from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_gt4py.stencil import get_gt4py_stencil, print_gt4py_stencil_list
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional
+    from typing import Literal
 
 
 def run(
@@ -39,13 +39,13 @@ def run(
     data_shape: dict[str, int],
     precision: Literal["double", "single"],
     imports: tuple[str, ...],
-    in_file_paths: Optional[tuple[str, ...]],
-    write_in_file_path: Optional[str],
-    out_file_path: Optional[str],
+    in_file_paths: tuple[str, ...] | None,
+    write_in_file_path: str | None,
+    out_file_path: str | None,
     externals: dict,
     backend: str,
     enable_checks: bool,
-    num_runs: Optional[int],
+    num_runs: int | None,
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:

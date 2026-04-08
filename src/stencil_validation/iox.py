@@ -34,7 +34,7 @@ from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
-    from typing import Literal, Optional
+    from typing import Literal
 
     import numpy.typing as npt
 
@@ -51,18 +51,18 @@ class IOFileOperator:
     def get_field(
         self,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
-    ) -> Optional[npt.NDArray]: ...
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
+    ) -> npt.NDArray | None: ...
 
     def set_field(
         self,
         data: npt.NDArray,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
     ) -> None: ...
 
 
@@ -84,10 +84,10 @@ class HDF5Operator(IOFileOperator):
     def get_field(
         self,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
-    ) -> Optional[npt.NDArray]:
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
+    ) -> npt.NDArray | None:
         ds = self.f.get(name, None)
         if ds is None:
             return None
@@ -108,9 +108,9 @@ class HDF5Operator(IOFileOperator):
         self,
         data: npt.NDArray,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
     ) -> None:
         dtype = dtype or data.dtype
         if dims is None:
@@ -147,10 +147,10 @@ class NetCDFOperator(IOFileOperator):
     def get_field(
         self,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
-    ) -> Optional[npt.NDArray]:
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
+    ) -> npt.NDArray | None:
         if name not in self.ds.variables:
             return None
         else:
@@ -181,9 +181,9 @@ class NetCDFOperator(IOFileOperator):
         self,
         data: npt.NDArray,
         name: str,
-        dims: Optional[Sequence[SizedDim]] = None,
-        dtype: Optional[npt.DTypeLike] = None,
-        units: Optional[str] = None,
+        dims: Sequence[SizedDim] | None = None,
+        dtype: npt.DTypeLike | None = None,
+        units: str | None = None,
     ) -> None:
         dtype = dtype or data.dtype
         if dims is None:
@@ -215,7 +215,7 @@ class NetCDFOperator(IOFileOperator):
 
 @contextlib.contextmanager
 def io_file_operator(
-    io_file_path: Optional[str], mode: Literal["a", "r", "w"]
+    io_file_path: str | None, mode: Literal["a", "r", "w"]
 ) -> Iterator[IOFileOperator]:
     op = DUMMY_IO_FILE_OP
 

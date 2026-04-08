@@ -19,7 +19,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 import warnings
 
 import click
@@ -39,9 +38,9 @@ RTOL = 1e-10
 def compare_io_files(
     src_file_path: str,
     trg_file_path: str,
-    index_slices: Optional[tuple[slice, ...]] = None,
-    atol: Optional[float] = ATOL,
-    rtol: Optional[float] = RTOL,
+    index_slices: tuple[slice, ...] | None = None,
+    atol: float | None = ATOL,
+    rtol: float | None = RTOL,
 ) -> None:
     with io_file_operator(src_file_path, mode="r") as src_file_op:
         with io_file_operator(trg_file_path, mode="r") as trg_file_op:

@@ -26,8 +26,6 @@ import gt4py
 from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     import numpy.typing as npt
 
     from stencil_validation.config import Config
@@ -54,7 +52,7 @@ class GT4PyField(Field):
         super().__post_init__()
         self.gt_dims = get_gt_dims(self.dims)
 
-    def get_default_value(self, config: Config) -> Optional[npt.NDArray]:
+    def get_default_value(self, config: Config) -> npt.NDArray | None:
         if (value := super().get_default_value(config)) is not None:
             return gt4py.storage.from_array(
                 value,
@@ -74,7 +72,7 @@ class GT4PyField(Field):
             dimensions=self.gt_dims,
         )
 
-    def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[npt.NDArray]:
+    def read_value(self, config: Config, io_file_op: IOFileOperator) -> npt.NDArray | None:
         if (value := super().read_value(config, io_file_op)) is not None:
             return gt4py.storage.from_array(
                 value,
@@ -94,7 +92,7 @@ class CompositeGT4PyField(CompositeField):
         self.gt_dims = get_gt_dims(self.dims)
 
     def concretize(
-        self, config: Config, io_file_paths: Optional[tuple[str, ...]] = None
+        self, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
         value = super().concretize(config, io_file_paths).value
         return ConcretizedDescriptor(

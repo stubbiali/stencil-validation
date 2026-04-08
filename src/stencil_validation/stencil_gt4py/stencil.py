@@ -30,7 +30,7 @@ from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, pri
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FunctionType
-    from typing import ClassVar, Optional
+    from typing import ClassVar
 
     import gt4py.cartesian as gtc
 
@@ -51,7 +51,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 
     stencil_obj: gtc.StencilObject
 
-    def __init__(self, config: Config, externals: Optional[dict] = None) -> None:
+    def __init__(self, config: Config, externals: dict | None = None) -> None:
         super().__init__(config)
 
         externals = externals or {}
@@ -108,10 +108,10 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 
     def __call__(
         self,
-        in_file_paths: Optional[tuple[str, ...]] = None,
-        write_in_file_path: Optional[str] = None,
-        out_file_path: Optional[str] = None,
-        num_runs: Optional[int] = None,
+        in_file_paths: tuple[str, ...] | None = None,
+        write_in_file_path: str | None = None,
+        out_file_path: str | None = None,
+        num_runs: int | None = None,
     ) -> None:
         in_cdesc_dict = self.read_args(self.inject_io_name(self.in_descriptors), in_file_paths)
         inout_cdesc_dict = self.read_args(
@@ -156,7 +156,7 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 
 
 def get_gt4py_stencil(
-    name: str, version: str, config: Config, externals: Optional[dict] = None
+    name: str, version: str, config: Config, externals: dict | None = None
 ) -> GT4PyStencil:
     return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]
 

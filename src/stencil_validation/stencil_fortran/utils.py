@@ -36,7 +36,7 @@ from stencil_validation.stencil_fortran.settings import (
 
 if TYPE_CHECKING:
     from types import ModuleType
-    from typing import Any, Literal, Optional
+    from typing import Any, Literal
 
 
 def get_cache_id(subroutine_id: str, src: str) -> str:
@@ -91,7 +91,7 @@ def render_subroutine_template(
 def compile_subroutine(
     src_file_path: str,
     cache_id: str,
-    compiler_args: Optional[list[str]] = None,
+    compiler_args: list[str] | None = None,
     opt_level: Literal[0, 1, 2, 3] = 3,
     rebuild: bool = False,
 ) -> ModuleType:
