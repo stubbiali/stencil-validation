@@ -48,12 +48,12 @@ dependencies = [
     'pint>=0.7'
 ]
 description = 'A Python framework to validate multiple implementations of stencil kernels.'
+dynamic = ['version']
 keywords = ['fortran', 'python', 'stencils', 'validation']
 license = {text = 'Apache-2'}
 name = 'stencil_validation'
 readme = {file = 'README.md', content-type = 'text/markdown'}
 requires-python = '>=3.10,<3.15'  # note(stubbiali): same as pmap
-version = '0.0'
 
 [project.optional-dependencies]
 dev = [
@@ -201,6 +201,9 @@ testpaths = ['tests']
 # === tool: setuptools
 [tool.setuptools]
 platforms = ['Linux', 'Mac']
+
+[tool.setuptools.dynamic]
+version = {attr = 'stencil_validation.__version__'}
 
 [tool.setuptools.package-data]
 'stencil_validation' = ['py.typed']
