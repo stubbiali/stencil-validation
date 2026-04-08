@@ -118,3 +118,7 @@ def compare_io_files(
                     )
 
                 print("\n== iodiff: end")
+
+
+if __name__ == "__main__":
+    compare_io_files()

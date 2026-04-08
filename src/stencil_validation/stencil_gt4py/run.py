@@ -125,3 +125,7 @@ def main(
         verbose=verbose,
         print_stencil_list=print_stencil_list,
     )
+
+
+if __name__ == "__main__":
+    main()
