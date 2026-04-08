@@ -18,10 +18,10 @@
 # under the License.
 
 from __future__ import annotations
+
 from typing import Optional
 
 from stencil_validation.settings import GLOBAL_SETTINGS
-
 
 ANSI_ESCAPE_SEQUENCES = {
     "end": "\033[0m",

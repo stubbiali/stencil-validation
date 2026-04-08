@@ -18,12 +18,13 @@
 # under the License.
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Union
+    from typing import Optional, Union
 
     from stencil_validation.config import Config
 
@@ -67,7 +68,7 @@ class Dim:
     def __neg__(self) -> Dim:
         return Dim(self.name, self.offset, flip(self.direction))
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Dim):
             return (
                 self.name == other.name
@@ -129,7 +130,7 @@ class IndexedDim:
     def __neg__(self) -> IndexedDim:
         return IndexedDim(-self.dim, self.index)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Dim):
             return self.dim == other
         elif isinstance(other, IndexedDim):

@@ -18,9 +18,10 @@
 # under the License.
 
 from __future__ import annotations
-from pint.registry import UnitRegistry
+
 import re
 
+from pint.registry import UnitRegistry
 
 UNIT_REGISTRY = UnitRegistry()
 

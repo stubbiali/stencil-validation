@@ -18,21 +18,23 @@
 # under the License.
 
 from __future__ import annotations
+
 from abc import abstractmethod
 import dataclasses
-import numpy as np
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.utils.numpyx import to_numpy
+import numpy as np
 
 from stencil_validation.dims import ExpandedDim
 from stencil_validation.iox import io_file_operator
-from stencil_validation.utils import printx
 from stencil_validation.typingx import BoolType, FloatType, IntType
+from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
-    from numpy.typing import DTypeLike, NDArray
     from typing import Any, Iterator, Literal, Optional
+
+    from numpy.typing import DTypeLike, NDArray
 
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim, GenericDim, SizedDim
@@ -116,12 +118,11 @@ class ConcretizedDescriptor:
 
         if value is not None:
             printx(f"  * `io_name` found in `{io_file_op.f_path}`")  # type: ignore[union-attr]
+        elif (value := desc.get_default_value(config)) is not None:
+            printx("  * use default value")
         else:
-            if (value := desc.get_default_value(config)) is not None:
-                printx("  * use default value")
-            else:
-                value = desc.get_random_value(config)
-                printx("  * use random value")
+            value = desc.get_random_value(config)
+            printx("  * use random value")
 
         assert value is not None
 
@@ -143,14 +144,17 @@ class Bool(Descriptor):
 
     def read_value(self, config: Config, io_file_op: IOFileOperator) -> Optional[BoolType]:
         value = io_file_op.get_field(
-            self.io_name, dtype=config.gt4py_config.dtypes.bool  # type: ignore[arg-type]
+            self.io_name,
+            dtype=config.gt4py_config.dtypes.bool,  # type: ignore[arg-type]
         )
         return value.item() if value is not None else None
 
     def write_value(self, value: BoolType, config: Config, io_file_op: IOFileOperator) -> None:
         # note(stubbiali): netCDF4 does not support boolean fields
         io_file_op.set_field(
-            data=np.array([int(value)]), name=self.io_name_write, dtype=int  # type: ignore[arg-type]
+            data=np.array([int(value)]),
+            name=self.io_name_write,
+            dtype=int,  # type: ignore[arg-type]
         )
 
 

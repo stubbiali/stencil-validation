@@ -18,6 +18,7 @@
 # under the License.
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from stencil_validation.descriptors import concretize, to_file

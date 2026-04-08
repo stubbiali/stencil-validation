@@ -18,13 +18,15 @@
 # under the License.
 
 from __future__ import annotations
+
 from contextlib import contextmanager
 import dataclasses
+import os
+from typing import TYPE_CHECKING
+
 import h5py as h5
 import netCDF4 as nc
 import numpy as np
-import os
-from typing import TYPE_CHECKING
 
 from stencil_validation.dims import Dim, SizedDim
 from stencil_validation.units import get_conversion_factor
@@ -32,8 +34,9 @@ from stencil_validation.utils import printx
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
-    from numpy.typing import DTypeLike, NDArray
     from typing import Literal, Optional
+
+    from numpy.typing import DTypeLike, NDArray
 
 
 @dataclasses.dataclass

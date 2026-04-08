@@ -18,19 +18,22 @@
 # under the License.
 
 from __future__ import annotations
-import numpy as np
+
 import os
-import pytest
 import tempfile
 from typing import TYPE_CHECKING
 import uuid
 
+import numpy as np
+
 from stencil_validation.config import Config
 from stencil_validation.descriptors import concretize, to_file
-from stencil_validation.dims import Dim, IJ, K
+from stencil_validation.dims import IJ, Dim, K
 from stencil_validation.iox import io_file_operator
 from stencil_validation.stencil_fortran.descriptors import CompositeFortranField, FortranField
 from stencil_validation.stencil_gt4py.descriptors import CompositeGT4PyField, GT4PyField
+
+import pytest
 
 if TYPE_CHECKING:
     from stencil_validation.descriptors import CompositeField, Field

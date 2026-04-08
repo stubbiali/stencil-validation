@@ -18,14 +18,15 @@
 # under the License.
 
 from __future__ import annotations
-import numpy as np
+
 from typing import TYPE_CHECKING
 
 from ifs_physics_common.utils.timing import timing
+import numpy as np
 
 from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
-from stencil_validation.stencil_fortran.utils import render_subroutine_template, compile_subroutine
+from stencil_validation.stencil_fortran.utils import compile_subroutine, render_subroutine_template
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

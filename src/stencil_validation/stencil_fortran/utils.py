@@ -18,12 +18,14 @@
 # under the License.
 
 from __future__ import annotations
-import fmodpy
+
 import hashlib
-from jinja2 import Environment, FileSystemLoader
 import os
 import shutil
 from typing import TYPE_CHECKING
+
+import fmodpy
+from jinja2 import Environment, FileSystemLoader
 
 from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_fortran.settings import (
@@ -69,7 +71,7 @@ def render_subroutine_template(
     search_path, f_fullname = f_path.rsplit("/", maxsplit=1)
     f_name, f_ext = f_fullname.rsplit(".", maxsplit=1)
     if f_ext != "in":
-        raise RuntimeError(f"The extension of the template file should be `.in`.")
+        raise RuntimeError("The extension of the template file should be `.in`.")
 
     loader = FileSystemLoader(search_path)
     env = Environment(loader=loader)

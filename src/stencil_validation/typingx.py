@@ -17,9 +17,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import numpy as np
 from typing import Union
 
+import numpy as np
 
 BoolType = Union[bool]
 FloatType = Union[float, np.float32, np.float64]

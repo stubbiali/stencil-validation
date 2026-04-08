@@ -18,13 +18,14 @@
 # under the License.
 
 from __future__ import annotations
-import click
-import numpy as np
+
 from typing import Optional
 import warnings
 
-from stencil_validation.iox import io_file_operator
+import click
+import numpy as np
 
+from stencil_validation.iox import io_file_operator
 
 ATOL = 1e-12
 RTOL = 1e-10

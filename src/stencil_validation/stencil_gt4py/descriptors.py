@@ -18,6 +18,7 @@
 # under the License.
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from gt4py.storage import from_array
@@ -25,8 +26,9 @@ from gt4py.storage import from_array
 from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
     from typing import Optional
+
+    from numpy.typing import NDArray
 
     from stencil_validation.config import Config
     from stencil_validation.dims import Dim

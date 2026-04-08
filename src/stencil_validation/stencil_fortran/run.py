@@ -18,9 +18,11 @@
 # under the License.
 
 from __future__ import annotations
-import click
+
 import importlib
 from typing import TYPE_CHECKING
+
+import click
 
 from stencil_validation.config import Config
 from stencil_validation.settings import GLOBAL_SETTINGS

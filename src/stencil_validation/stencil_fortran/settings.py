@@ -18,8 +18,8 @@
 # under the License.
 
 from __future__ import annotations
-import os
 
+import os
 
 FMODPY_CACHE_ROOT: str = os.environ.get("FMODPY_CACHE_ROOT", "")
 FMODPY_BUILD_CACHE: str = os.path.join(FMODPY_CACHE_ROOT, ".fmodpy_build_cache")

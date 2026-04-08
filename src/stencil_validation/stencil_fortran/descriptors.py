@@ -18,14 +18,17 @@
 # under the License.
 
 from __future__ import annotations
-import numpy as np
+
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 from stencil_validation.descriptors import CompositeField, ConcretizedDescriptor, Field
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
     from typing import Optional
+
+    from numpy.typing import NDArray
 
     from stencil_validation.config import Config
     from stencil_validation.iox import IOFileOperator
