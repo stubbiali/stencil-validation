@@ -154,7 +154,7 @@ class SizedDim:
     def from_config(cls, dim: Dim | IndexedDim, config: Config) -> SizedDim:
         inner_dim = dim.dim if isinstance(dim, IndexedDim) else dim
         size = config.grid_shape.get(
-            inner_dim.name, config.data_shape.get(inner_dim.name, inner_dim.static_size)
+            inner_dim, config.data_shape.get(inner_dim.name, inner_dim.static_size)
         )
         if size is None:
             raise RuntimeError(f"Size not specified for dim `{inner_dim.name}`.")
