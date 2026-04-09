@@ -35,13 +35,9 @@ if TYPE_CHECKING:
 
 @dataclasses.dataclass
 class Config:
-    data_shape: dict[str, int] = dataclasses.field(default_factory=dict)
-    grid_shape: dict[Dim, int] = dataclasses.field(
-        default_factory=lambda: {I: 1, IJ: 1, J: 1, K: 1}
-    )
-    gt4py_config: ifs_physics_common.GT4PyConfig = dataclasses.field(
-        default_factory=lambda: ifs_physics_common.GT4PyConfig(backend="numpy")
-    )
+    data_shape: dict[str, int]
+    grid_shape: dict[Dim, int]
+    gt4py_config: ifs_physics_common.GT4PyConfig
     precision: Literal["double", "single"] = "double"
     project_root: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     verbose: bool = False
