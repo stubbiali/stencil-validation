@@ -72,7 +72,7 @@ def test_invalid_dim(field_cls: type[Field], composite_field_cls: type[Composite
 )
 def test_invalid_field_dim(field_cls, composite_field_cls):
     with pytest.raises(ValueError):
-        config = Config(grid_shape={"IJ": 16, "K": 8}, data_shape={"D2": 2})
+        config = Config.from_cli(nx=16, nz=8, data_shape={"D2": 2})
         desc = composite_field_cls(
             dims=(IJ, K, D2),
             fields_map={
@@ -89,7 +89,7 @@ def test_invalid_field_dim(field_cls, composite_field_cls):
 )
 def test(field_cls: type[Field], composite_field_cls: type[CompositeField]):
     with tempfile.TemporaryDirectory() as tmpdir:
-        config = Config(grid_shape={"IJ": 16, "K": 8}, data_shape={"D2": 2})
+        config = Config.from_cli(nx=16, nz=8, data_shape={"D2": 2})
 
         field0 = field_cls(dims=(IJ, K), io_name="A")
         field1 = field_cls(dims=(IJ, K), io_name="B")
