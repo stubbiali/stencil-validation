@@ -28,7 +28,6 @@ from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
     from types import FunctionType
     from typing import ClassVar
 
@@ -42,7 +41,7 @@ GT4PY_STENCIL_COLLECTION: dict[str, "MetaGT4PyStencil"] = {}
 
 
 class MetaGT4PyStencil(MetaStencil):
-    COLLECTION: Mapping[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION
+    COLLECTION: dict[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION
 
 
 class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):

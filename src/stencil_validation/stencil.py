@@ -25,8 +25,6 @@ from stencil_validation.descriptors import concretize, to_file
 from stencil_validation.iox import io_file_operator
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict, DescriptorDict
 
@@ -44,7 +42,7 @@ def decode_stencil_id(stencil_id: str) -> tuple[str, str]:
 
 
 class MetaStencil(type):
-    COLLECTION: Mapping[str, type]
+    COLLECTION: dict[str, type]
 
     def __new__(cls, cls_name: str, bases: tuple[type, ...], dct: dict) -> type:
         name = dct.get("name", "")
@@ -94,7 +92,7 @@ class Stencil:
             to_file(cdesc_dict, self.config, file_op)
 
 
-def print_stencil_list(stencil_collection: Mapping[str, MetaStencil]) -> None:
+def print_stencil_list(stencil_collection: dict[str, MetaStencil]) -> None:
     stencil_list: dict[str, list[str]] = {}
     for stencil_id in stencil_collection:
         name, version = decode_stencil_id(stencil_id)

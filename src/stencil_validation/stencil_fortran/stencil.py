@@ -30,7 +30,6 @@ from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, pri
 from stencil_validation.stencil_fortran.utils import compile_subroutine, render_subroutine_template
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
     from types import FunctionType
     from typing import ClassVar, Literal
 
@@ -42,7 +41,7 @@ FORTRAN_STENCIL_COLLECTION: dict[str, "MetaFortranStencil"] = {}
 
 
 class MetaFortranStencil(MetaStencil):
-    COLLECTION: Mapping[str, MetaFortranStencil] = FORTRAN_STENCIL_COLLECTION
+    COLLECTION: dict[str, MetaFortranStencil] = FORTRAN_STENCIL_COLLECTION
 
 
 class FortranStencil(Stencil, metaclass=MetaFortranStencil):
