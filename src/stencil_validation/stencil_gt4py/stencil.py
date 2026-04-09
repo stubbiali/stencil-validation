@@ -19,8 +19,8 @@
 
 from __future__ import annotations
 
-import abc
-from typing import TYPE_CHECKING
+import dataclasses
+from typing import TYPE_CHECKING, ClassVar
 
 import ifs_physics_common
 
@@ -29,7 +29,6 @@ from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, pri
 
 if TYPE_CHECKING:
     from types import FunctionType
-    from typing import ClassVar
 
     import gt4py.cartesian as gtc
 
@@ -44,40 +43,39 @@ class MetaGT4PyStencil(MetaStencil):
     COLLECTION: dict[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION
 
 
+@dataclasses.dataclass
 class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
-    def_func: FunctionType
+    def_func: ClassVar[FunctionType]
     external_info: ClassVar[dict[str, dict]] = {}
 
-    stencil_obj: gtc.StencilObject
+    externals: dict = dataclasses.field(default_factory=dict)
+    stencil_obj: gtc.StencilObject = dataclasses.field(init=False)
 
-    def __init__(self, config: Config, externals: dict | None = None) -> None:
-        super().__init__(config)
-
-        externals = externals or {}
+    def __post_init__(self) -> None:
         for ext_name, ext_info in self.external_info.items():
             if "same_as" in ext_info:
                 trg_name = ext_info["same_as"]
-                if trg_name not in externals:
+                if trg_name not in self.externals:
                     raise RuntimeError(
                         f"Value for the external symbol `{trg_name}` not found to initialize the "
                         f"external symbol `{ext_name}`."
                     )
-                externals[ext_name] = externals[trg_name]
+                self.externals[ext_name] = self.externals[trg_name]
             else:
                 if "type" not in ext_info:
                     raise RuntimeError(f"No type specified for external symbol `{ext_name}`.")
                 ext_type = ext_info["type"]
-                if ext_name in externals:
-                    externals[ext_name] = ext_type(externals[ext_name])
+                if ext_name in self.externals:
+                    self.externals[ext_name] = ext_type(self.externals[ext_name])
                 elif "default" in ext_info:
-                    externals[ext_name] = ext_type(ext_info["default"])
+                    self.externals[ext_name] = ext_type(ext_info["default"])
                 else:
                     raise RuntimeError(f"No value specified for external symbol `{ext_name}`.")
 
         stencil_id = get_stencil_id(self.name, self.version)
         ifs_physics_common.stencil_collection(stencil_id)(self.def_func.__func__)
         self.stencil_obj = ifs_physics_common.compile_stencil(
-            stencil_id, self.config.gt4py_config, externals
+            stencil_id, self.config.gt4py_config, self.externals
         )
 
     @property
@@ -89,12 +87,12 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
         return {}
 
     @property
-    @abc.abstractmethod
-    def origin(self) -> tuple[int, int, int]: ...
+    def origin(self) -> tuple[int, int, int]:
+        return 0, 0, 0
 
     @property
-    @abc.abstractmethod
-    def domain(self) -> tuple[int, int, int]: ...
+    def domain(self) -> tuple[int, int, int]:
+        return self.config.nx, self.config.ny, self.config.nz
 
     def process_cdesc_dicts(
         self,

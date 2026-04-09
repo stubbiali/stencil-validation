@@ -25,7 +25,6 @@ from typing import TYPE_CHECKING
 import click
 
 from stencil_validation.config import Config
-from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_gt4py.stencil import get_gt4py_stencil, print_gt4py_stencil_list
 
 if TYPE_CHECKING:
@@ -49,12 +48,13 @@ def run(
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
-    GLOBAL_SETTINGS.with_verbosity(verbose)
-    config = (
-        Config()
-        .with_precision(precision)
-        .with_grid_shape(*grid_shape)
-        .with_data_shape(**data_shape)
+    config = Config.from_cli(
+        *grid_shape,
+        data_shape,
+        precision,
+        verbose,
+        gt4py_backend=backend,
+        gt4py_validate_args=enable_checks,
     )
 
     for module in imports:
@@ -63,9 +63,6 @@ def run(
     if print_stencil_list:
         print_gt4py_stencil_list()
     else:
-        config.gt4py_config = config.gt4py_config.with_backend(backend).with_validate_args(
-            enable_checks
-        )
         get_gt4py_stencil(name, version, config, externals=externals)(
             in_file_paths, write_in_file_path, out_file_path, num_runs=num_runs
         )
