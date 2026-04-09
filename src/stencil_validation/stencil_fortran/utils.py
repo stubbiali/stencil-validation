@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING
 import fmodpy
 import jinja2
 
-from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_fortran.settings import (
     FMODPY_BUILD_CACHE,
     FMODPY_CACHE,
@@ -94,6 +93,7 @@ def compile_subroutine(
     compiler_args: list[str] | None = None,
     opt_level: Literal[0, 1, 2, 3] = 3,
     rebuild: bool = False,
+    verbose: bool = False,
 ) -> ModuleType:
     module: ModuleType = fmodpy.fimport(
         src_file_path,
@@ -102,7 +102,7 @@ def compile_subroutine(
         output_dir=os.path.join(FMODPY_CACHE, cache_id),
         optimization_level=f"-O{opt_level}",
         rebuild=rebuild,
-        verbose=GLOBAL_SETTINGS.verbose,
+        verbose=verbose,
     )
     shutil.rmtree(FMODPY_BUILD_CACHE, ignore_errors=False)
     return module

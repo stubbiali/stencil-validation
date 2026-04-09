@@ -25,7 +25,6 @@ from typing import TYPE_CHECKING
 import click
 
 from stencil_validation.config import Config
-from stencil_validation.settings import GLOBAL_SETTINGS
 from stencil_validation.stencil_fortran.stencil import (
     get_fortran_stencil,
     print_fortran_stencil_list,
@@ -51,13 +50,7 @@ def run(
     verbose: bool,
     print_stencil_list: bool,
 ) -> None:
-    GLOBAL_SETTINGS.with_verbosity(verbose)
-    config = (
-        Config()
-        .with_precision(precision)
-        .with_grid_shape(*grid_shape)
-        .with_data_shape(**data_shape)
-    )
+    config = Config.from_cli(*grid_shape, data_shape, precision, verbose)
 
     for module in imports:
         importlib.import_module(module)

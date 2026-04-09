@@ -19,7 +19,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import dataclasses
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 
@@ -31,7 +32,7 @@ from stencil_validation.stencil_fortran.utils import compile_subroutine, render_
 
 if TYPE_CHECKING:
     from types import FunctionType
-    from typing import ClassVar, Literal
+    from typing import Literal
 
     from stencil_validation.config import Config
     from stencil_validation.descriptors import ConcretizedDescriptorDict
@@ -44,9 +45,10 @@ class MetaFortranStencil(MetaStencil):
     COLLECTION: dict[str, MetaFortranStencil] = FORTRAN_STENCIL_COLLECTION
 
 
+@dataclasses.dataclass
 class FortranStencil(Stencil, metaclass=MetaFortranStencil):
-    template_file_path: str = ""
-    template_var_info: ClassVar[dict[str, dict]] = {}
+    template_file_path: str
+    template_var_info: ClassVar[dict[str, dict]]
 
     def __call__(
         self,
@@ -84,6 +86,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
             compiler_args=compiler_args,
             opt_level=opt_level,
             rebuild=rebuild,
+            verbose=self.config.global_settings.verbose,
         )
         fn = getattr(module, self.name, None)
         if fn is None:
