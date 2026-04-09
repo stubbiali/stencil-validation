@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 class IOFileOperator:
     f_path: str = ""
     mode: Literal["a", "r", "w"] = "r"
+    verbose: bool = False
 
     @property
     def field_names(self) -> tuple[str, ...]:
@@ -98,6 +99,7 @@ class HDF5Operator(IOFileOperator):
                     printx(
                         f"H5 field `{name}` has {out.ndim} dimensions; expected {len(dims)}.",
                         color="grey",
+                        verbose=self.verbose,
                     )
                     return None
             if dtype is not None:
@@ -169,6 +171,7 @@ class NetCDFOperator(IOFileOperator):
                     printx(
                         f"NetCDF field `{name}` has {out.ndim} dimensions; expected {len(dims)}.",
                         color="grey",
+                        verbose=self.verbose,
                     )
                     return None
 
@@ -215,7 +218,7 @@ class NetCDFOperator(IOFileOperator):
 
 @contextlib.contextmanager
 def io_file_operator(
-    io_file_path: str | None, mode: Literal["a", "r", "w"]
+    io_file_path: str | None, mode: Literal["a", "r", "w"], verbose: bool = False
 ) -> Iterator[IOFileOperator]:
     op = DUMMY_IO_FILE_OP
 
@@ -223,7 +226,7 @@ def io_file_operator(
         f_path = os.path.abspath(io_file_path)
 
         if mode == "r" and not os.path.exists(f_path):
-            printx(f"The file `{f_path}` does not exist.")
+            printx(f"The file `{f_path}` does not exist.", verbose=verbose)
         else:
             parent_dir, _ = f_path.rsplit("/", maxsplit=1)
             os.makedirs(parent_dir, exist_ok=True)
@@ -235,7 +238,7 @@ def io_file_operator(
             elif f_ext == "nc":
                 op = NetCDFOperator(f_path, mode)
             else:
-                printx(f"The file extension `{f_ext}` is not supported.")
+                printx(f"The file extension `{f_ext}` is not supported.", verbose=verbose)
 
     try:
         yield op

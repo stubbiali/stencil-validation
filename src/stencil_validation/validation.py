@@ -35,15 +35,17 @@ RTOL = 1e-10
 @click.argument("trg_file_path", type=str)
 @click.option("--atol", type=float, default=None)
 @click.option("--rtol", type=float, default=None)
+@click.option("--verbose", type=bool, is_flag=True)
 def compare_io_files(
     src_file_path: str,
     trg_file_path: str,
     index_slices: tuple[slice, ...] | None = None,
     atol: float | None = ATOL,
     rtol: float | None = RTOL,
+    verbose: bool = False,
 ) -> None:
-    with io_file_operator(src_file_path, mode="r") as src_file_op:
-        with io_file_operator(trg_file_path, mode="r") as trg_file_op:
+    with io_file_operator(src_file_path, mode="r", verbose=verbose) as src_file_op:
+        with io_file_operator(trg_file_path, mode="r", verbose=verbose) as trg_file_op:
             if src_file_op is None:
                 print(f"== iodiff: cannot open `{src_file_path}`")
             elif trg_file_op is None:

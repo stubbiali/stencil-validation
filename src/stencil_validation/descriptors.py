@@ -98,7 +98,7 @@ class ConcretizedDescriptor:
     def from_config_and_file(
         cls, desc: Descriptor, config: Config, io_file_paths: tuple[str, ...] | None = None
     ) -> ConcretizedDescriptor:
-        printx(f"Concretization of {desc}:")
+        printx(f"Concretization of {desc}:", verbose=(verbose := config.verbose))
 
         value = None
 
@@ -106,24 +106,26 @@ class ConcretizedDescriptor:
             if desc.io_file_path is not None:
                 with io_file_operator(desc.io_file_path, "r") as io_file_op:
                     if (value := desc.read_value(config, io_file_op)) is None:
-                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`", verbose=verbose)
 
             if value is None:
                 io_file_paths = io_file_paths or []
                 for io_file_path in io_file_paths:
                     with io_file_operator(io_file_path, "r") as io_file_op:
                         if (value := desc.read_value(config, io_file_op)) is None:
-                            printx(f"  * `io_name` not found in `{io_file_op.f_path}`")
+                            printx(
+                                f"  * `io_name` not found in `{io_file_op.f_path}`", verbose=verbose
+                            )
                         else:
                             break
 
         if value is not None:
-            printx(f"  * `io_name` found in `{io_file_op.f_path}`")  # type: ignore[union-attr]
+            printx(f"  * `io_name` found in `{io_file_op.f_path}`", verbose=verbose)  # type: ignore[union-attr]
         elif (value := desc.get_default_value(config)) is not None:
-            printx("  * use default value")
+            printx("  * use default value", verbose=verbose)
         else:
             value = desc.get_random_value(config)
-            printx("  * use random value")
+            printx("  * use random value", verbose=verbose)
 
         assert value is not None
 
