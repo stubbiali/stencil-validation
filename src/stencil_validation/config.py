@@ -20,48 +20,65 @@
 from __future__ import annotations
 
 import dataclasses
+import os
 from typing import TYPE_CHECKING
 
 import ifs_physics_common
 
+from stencil_validation.dims import IJ, I, J, K
+
 if TYPE_CHECKING:
     from typing import Literal
+
+    from stencil_validation.dims import Dim
 
 
 @dataclasses.dataclass
 class Config:
-    grid_shape: dict[str, int] = dataclasses.field(
-        default_factory=lambda: {"I": 1, "IJ": 1, "J": 1, "K": 1}
-    )
     data_shape: dict[str, int] = dataclasses.field(default_factory=dict)
+    grid_shape: dict[Dim, int] = dataclasses.field(
+        default_factory=lambda: {I: 1, IJ: 1, J: 1, K: 1}
+    )
     gt4py_config: ifs_physics_common.GT4PyConfig = dataclasses.field(
         default_factory=lambda: ifs_physics_common.GT4PyConfig(backend="numpy")
     )
     precision: Literal["double", "single"] = "double"
+    project_root: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    verbose: bool = False
+
+    @classmethod
+    def from_cli(
+        cls,
+        nx: int = 1,
+        ny: int = 1,
+        nz: int = 1,
+        data_shape: dict[str, int] | None = None,
+        precision: Literal["double", "single"] = "double",
+        verbose: bool = False,
+        gt4py_backend: str = "numpy",
+        gt4py_validate_args: bool = True,
+    ) -> Config:
+        return cls(
+            grid_shape={I: nx, IJ: nx, J: ny, K: nz},
+            data_shape=data_shape or {},
+            precision=precision,
+            verbose=verbose,
+            gt4py_config=ifs_physics_common.GT4PyConfig(
+                backend=gt4py_backend,
+                dtypes=ifs_physics_common.DataTypes.from_precision(precision),
+                validate_args=gt4py_validate_args,
+                verbose=verbose,
+            ),
+        )
 
     @property
     def nx(self) -> int:
-        return self.grid_shape["I"]
+        return self.grid_shape[I]
 
     @property
     def ny(self) -> int:
-        return self.grid_shape["J"]
+        return self.grid_shape[J]
 
     @property
     def nz(self) -> int:
-        return self.grid_shape["K"]
-
-    def with_grid_shape(self, nx: int, ny: int, nz: int) -> Config:
-        self.grid_shape["I"] = self.grid_shape["IJ"] = nx
-        self.grid_shape["J"] = ny
-        self.grid_shape["K"] = nz
-        return self
-
-    def with_data_shape(self, **kwargs: int) -> Config:
-        self.data_shape = {**self.data_shape, **kwargs}
-        return self
-
-    def with_precision(self, precision: Literal["double", "single"]) -> Config:
-        self.precision = precision
-        self.gt4py_config.dtypes = self.gt4py_config.dtypes.with_precision(precision)
-        return self
+        return self.grid_shape[K]
