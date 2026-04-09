@@ -35,7 +35,7 @@ RTOL = 1e-10
 @click.argument("trg_file_path", type=str)
 @click.option("--atol", type=float, default=None)
 @click.option("--rtol", type=float, default=None)
-@click.option("--verbose", type=bool, is_flag=True)
+@click.option("--verbose", is_flag=True, default=False)
 def compare_io_files(
     src_file_path: str,
     trg_file_path: str,
