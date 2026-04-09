@@ -19,7 +19,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import dataclasses
+from typing import TYPE_CHECKING, ClassVar
 
 from stencil_validation.descriptors import concretize, to_file
 from stencil_validation.iox import io_file_operator
@@ -57,14 +58,12 @@ class MetaStencil(type):
             return out
 
 
+@dataclasses.dataclass
 class Stencil:
-    name: str = ""
-    version: str = ""
+    name: ClassVar[str]
+    version: ClassVar[str]
 
     config: Config
-
-    def __init__(self, config: Config) -> None:
-        self.config = config
 
     @property
     def in_descriptors(self) -> DescriptorDict:
