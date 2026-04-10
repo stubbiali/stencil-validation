@@ -86,7 +86,7 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
             compiler_args=compiler_args,
             opt_level=opt_level,
             rebuild=rebuild,
-            verbose=self.config.global_settings.verbose,
+            verbose=self.config.verbose,
         )
         fn = getattr(module, self.name, None)
         if fn is None:
