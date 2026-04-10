@@ -96,8 +96,8 @@ class Dim:
         else:
             return f"-{self.name}" if self.direction == Direction.NEGATIVE else f"{self.name}"
 
-    def without_offset(self) -> Dim:
-        return Dim(self.name, 0, self.direction, self.static_size)
+    def without_offset_and_direction(self) -> Dim:
+        return Dim(self.name, 0, Direction.POSITIVE, self.static_size)
 
     def with_size(self, config: Config | None = None) -> SizedDim:
         if config is None:
@@ -157,7 +157,8 @@ class SizedDim:
     def from_config(cls, dim: Dim | IndexedDim, config: Config) -> SizedDim:
         inner_dim = dim.dim if isinstance(dim, IndexedDim) else dim
         size = config.grid_shape.get(
-            inner_dim.without_offset(), config.data_shape.get(inner_dim.name, inner_dim.static_size)
+            inner_dim.without_offset_and_direction(),
+            config.data_shape.get(inner_dim.name, inner_dim.static_size),
         )
         if size is None:
             raise RuntimeError(f"Size not specified for dim `{inner_dim.name}`.")
