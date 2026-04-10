@@ -47,7 +47,7 @@ class MetaFortranStencil(MetaStencil):
 
 @dataclasses.dataclass
 class FortranStencil(Stencil, metaclass=MetaFortranStencil):
-    template_file_path: str
+    template_file_path: ClassVar[str]
     template_var_info: ClassVar[dict[str, dict]]
 
     def __call__(
