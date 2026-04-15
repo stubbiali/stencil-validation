@@ -72,9 +72,6 @@ class IOFileOperator:
     ) -> None: ...
 
 
-DUMMY_IO_FILE_OP = IOFileOperator()
-
-
 @dataclasses.dataclass
 class HDF5Operator(IOFileOperator):
     def __post_init__(self) -> None:
@@ -227,13 +224,11 @@ class NetCDFOperator(IOFileOperator):
 def io_file_operator(
     io_file_path: str | None, mode: Literal["a", "r", "w"], verbose: bool = False
 ) -> Iterator[IOFileOperator]:
-    op = DUMMY_IO_FILE_OP
-
     if io_file_path is not None:
         f_path = os.path.abspath(io_file_path)
 
         if mode == "r" and not os.path.exists(f_path):
-            printx(f"The file `{f_path}` does not exist.", verbose=verbose)
+            op = IOFileOperator(f_path, mode="e", error_msg="the file does not exist")
         else:
             parent_dir, _ = f_path.rsplit("/", maxsplit=1)
             os.makedirs(parent_dir, exist_ok=True)
@@ -241,14 +236,17 @@ def io_file_operator(
             f_ext = os.path.splitext(f_path)[1][1:]
 
             if f_ext == "h5":
-                op = HDF5Operator(f_path, mode)
+                op = HDF5Operator(f_path, mode, verbose=verbose)
             elif f_ext == "nc":
-                op = NetCDFOperator(f_path, mode)
+                op = NetCDFOperator(f_path, mode, verbose=verbose)
             else:
-                printx(f"The file extension `{f_ext}` is not supported.", verbose=verbose)
+                op = IOFileOperator(
+                    f_path, mode="e", error_msg="the file extension is not supported"
+                )
+    else:
+        op = IOFileOperator()
 
     try:
         yield op
     finally:
-        if op != DUMMY_IO_FILE_OP:
-            del op
+        del op
