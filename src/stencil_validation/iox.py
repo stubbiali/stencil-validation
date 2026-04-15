@@ -42,8 +42,13 @@ if TYPE_CHECKING:
 @dataclasses.dataclass
 class IOFileOperator:
     f_path: str = ""
-    mode: Literal["a", "r", "w"] = "r"
+    mode: Literal["a", "r", "w", "e"] = "r"
     verbose: bool = False
+    error_msg: str = ""
+
+    def __post_init__(self) -> None:
+        if self.mode == "e":
+            assert self.error_msg
 
     @property
     def field_names(self) -> tuple[str, ...]:
@@ -73,6 +78,7 @@ DUMMY_IO_FILE_OP = IOFileOperator()
 @dataclasses.dataclass
 class HDF5Operator(IOFileOperator):
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.f = h5.File(self.f_path, mode=self.mode)
 
     def __del__(self) -> None:
@@ -137,6 +143,7 @@ Scalar = Dim("scalar", static_size=1).with_size()
 @dataclasses.dataclass
 class NetCDFOperator(IOFileOperator):
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.ds = nc.Dataset(self.f_path, mode=self.mode)
 
     def __del__(self) -> None:
