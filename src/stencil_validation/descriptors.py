@@ -104,18 +104,22 @@ class ConcretizedDescriptor:
 
         if desc.io_name is not None:
             if desc.io_file_path is not None:
-                with io_file_operator(desc.io_file_path, "r") as io_file_op:
+                with io_file_operator(desc.io_file_path, "r", verbose=False) as io_file_op:
                     if (value := desc.read_value(config, io_file_op)) is None:
-                        printx(f"  * `io_name` not found in `{io_file_op.f_path}`", verbose=verbose)
+                        msg = f"  * `io_name` not found in `{io_file_op.f_path}`"
+                        if io_file_op.mode == "e":
+                            msg += f" ({io_file_op.error_msg})"
+                        printx(msg, verbose=verbose)
 
             if value is None:
                 io_file_paths = io_file_paths or []
                 for io_file_path in io_file_paths:
-                    with io_file_operator(io_file_path, "r") as io_file_op:
+                    with io_file_operator(io_file_path, "r", verbose=False) as io_file_op:
                         if (value := desc.read_value(config, io_file_op)) is None:
-                            printx(
-                                f"  * `io_name` not found in `{io_file_op.f_path}`", verbose=verbose
-                            )
+                            msg = f"  * `io_name` not found in `{io_file_op.f_path}`"
+                            if io_file_op.mode == "e":
+                                msg += f" ({io_file_op.error_msg})"
+                            printx(msg, verbose=verbose)
                         else:
                             break
 
