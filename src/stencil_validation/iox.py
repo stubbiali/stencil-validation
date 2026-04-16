@@ -73,15 +73,16 @@ class IOFileOperator:
         units: str | None = None,
     ) -> None: ...
 
+    def close_file(self) -> None: ...
+
 
 @dataclasses.dataclass
 class HDF5Operator(IOFileOperator):
+    f: h5.File = dataclasses.field(init=False)
+
     def __post_init__(self) -> None:
         super().__post_init__()
         self.f = h5.File(self.f_path, mode=self.mode)
-
-    def __del__(self) -> None:
-        self.f.close()
 
     @property
     def field_names(self) -> tuple[str, ...]:
@@ -135,18 +136,23 @@ class HDF5Operator(IOFileOperator):
             self.f.create_dataset(name=name, shape=shape, dtype=dtype)
         self.f[name][tuple(index_slices)] = data
 
+    def close_file(self) -> None:
+        try:
+            self.f.close()
+        except Exception as e:
+            raise RuntimeError(f"Could not close {self.f_path}: {e}") from e
+
 
 Scalar = Dim("scalar", static_size=1).with_size()
 
 
 @dataclasses.dataclass
 class NetCDFOperator(IOFileOperator):
+    ds: nc.Dataset = dataclasses.field(init=False)
+
     def __post_init__(self) -> None:
         super().__post_init__()
         self.ds = nc.Dataset(self.f_path, mode=self.mode)
-
-    def __del__(self) -> None:
-        self.ds.close()
 
     @property
     def field_names(self) -> tuple[str, ...]:
@@ -221,6 +227,12 @@ class NetCDFOperator(IOFileOperator):
         if units is not None:
             self.ds[name].units = units
 
+    def close_file(self) -> None:
+        try:
+            self.ds.close()
+        except Exception as e:
+            raise RuntimeError(f"Could not close {self.f_path}: {e}") from e
+
 
 @contextlib.contextmanager
 def io_file_operator(
@@ -251,4 +263,4 @@ def io_file_operator(
     try:
         yield op
     finally:
-        del op
+        op.close_file()
