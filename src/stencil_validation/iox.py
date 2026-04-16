@@ -242,7 +242,7 @@ def io_file_operator(
         f_path = os.path.abspath(io_file_path)
 
         if mode == "r" and not os.path.exists(f_path):
-            op = IOFileOperator(f_path, mode="e", error_msg="the file does not exist")
+            op = IOFileOperator(f_path, mode="e", error_msg="file does not exist")
         else:
             parent_dir, _ = f_path.rsplit("/", maxsplit=1)
             os.makedirs(parent_dir, exist_ok=True)
@@ -254,9 +254,7 @@ def io_file_operator(
             elif f_ext == "nc":
                 op = NetCDFOperator(f_path, mode, verbose=verbose)
             else:
-                op = IOFileOperator(
-                    f_path, mode="e", error_msg="the file extension is not supported"
-                )
+                op = IOFileOperator(f_path, mode="e", error_msg="file extension not supported")
     else:
         op = IOFileOperator()
 
