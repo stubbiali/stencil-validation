@@ -47,6 +47,8 @@ class IOFileOperator:
     error_msg: str = ""
 
     def __post_init__(self) -> None:
+        if self.f_path and self.mode in ("a", "r"):
+            assert os.path.exists(self.f_path)
         if self.mode == "e":
             assert self.error_msg
 
