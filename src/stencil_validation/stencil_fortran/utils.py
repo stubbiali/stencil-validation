@@ -32,6 +32,7 @@ from stencil_validation.stencil_fortran.settings import (
     FMODPY_CACHE,
     FMODPY_SRC_CACHE,
 )
+from stencil_validation.utils import cast
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -61,9 +62,9 @@ def render_subroutine_template(
             raise RuntimeError(f"No type specified for template variable `{var_name}`.")
         var_type = var_info["type"]
         if var_name in template_var_values:
-            data[var_name] = var_type(template_var_values[var_name])
+            data[var_name] = cast(template_var_values[var_name], var_type)
         elif "default" in var_info:
-            data[var_name] = var_type(var_info["default"])
+            data[var_name] = cast(var_info["default"], var_type)
         else:
             raise RuntimeError(f"No value specified for template variable `{var_name}`.")
 

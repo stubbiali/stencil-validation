@@ -26,6 +26,7 @@ import ifs_physics_common
 
 from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
+from stencil_validation.utils import cast
 
 if TYPE_CHECKING:
     from types import FunctionType
@@ -66,9 +67,9 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
                     raise RuntimeError(f"No type specified for external symbol `{ext_name}`.")
                 ext_type = ext_info["type"]
                 if ext_name in self.externals:
-                    self.externals[ext_name] = ext_type(self.externals[ext_name])
+                    self.externals[ext_name] = cast(self.externals[ext_name], ext_type)
                 elif "default" in ext_info:
-                    self.externals[ext_name] = ext_type(ext_info["default"])
+                    self.externals[ext_name] = cast(ext_info["default"], ext_type)
                 else:
                     raise RuntimeError(f"No value specified for external symbol `{ext_name}`.")
 

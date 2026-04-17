@@ -19,6 +19,8 @@
 
 from __future__ import annotations
 
+from typing import Any, TypeVar
+
 ANSI_ESCAPE_SEQUENCES = {
     "end": "\033[0m",
     "style": {"bold": "\033[1m", "italic": "\033[3m"},
@@ -37,3 +39,16 @@ def printx(
         if color in ANSI_ESCAPE_SEQUENCES["colors"]:
             msg = ANSI_ESCAPE_SEQUENCES["colors"][color] + msg + ANSI_ESCAPE_SEQUENCES["end"]
         print(msg, end=end, flush=flush)
+
+
+T = TypeVar("T")
+
+
+def cast(obj: Any, t: type[T]) -> type[T]:
+    if t is bool:
+        return obj in (1, "1", True, "True")
+    else:
+        try:
+            return t(obj)
+        except Exception as e:
+            raise RuntimeError(f"Object of type `{type(obj)}` cannot be cast to `{t}`: {e}") from e
