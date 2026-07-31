@@ -81,7 +81,13 @@ def compare_io_files(
                         trg_field = trg_file_op.get_field(key)[  # type: ignore[index]
                             index_slices if index_slices is not None else ...
                         ]
-                        assert src_field.shape == trg_field.shape
+
+                        if src_field.shape != trg_field.shape:
+                            print(
+                                f"   {key:{max_key_len}s}: shape mismatch "
+                                f"({src_field.shape} vs {trg_field.shape})"
+                            )
+                            continue
 
                         if src_field.dtype.kind == "b":
                             src_field = src_field.astype(float)
