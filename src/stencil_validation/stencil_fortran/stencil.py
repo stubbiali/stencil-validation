@@ -29,6 +29,7 @@ import ifs_physics_common
 from stencil_validation.descriptors import ConcretizedDescriptor
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
 from stencil_validation.stencil_fortran.utils import compile_subroutine, render_subroutine_template
+from stencil_validation.utils import StencilLookupError
 
 if TYPE_CHECKING:
     from types import FunctionType
@@ -125,7 +126,9 @@ class FortranStencil(Stencil, metaclass=MetaFortranStencil):
 
 
 def get_fortran_stencil(name: str, version: str, config: Config) -> FortranStencil:
-    return FORTRAN_STENCIL_COLLECTION[get_stencil_id(name, version)](config)  # type: ignore[no-any-return]
+    if (key := get_stencil_id(name, version)) not in FORTRAN_STENCIL_COLLECTION:
+        raise StencilLookupError(f"No Fortran stencil found with {name=} and {version=}.")
+    return FORTRAN_STENCIL_COLLECTION[key](config)  # type: ignore[no-any-return]
 
 
 def print_fortran_stencil_list() -> None:

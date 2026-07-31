@@ -52,3 +52,6 @@ def cast(obj: Any, t: type[T]) -> type[T]:
             return t(obj)
         except Exception as e:
             raise RuntimeError(f"Object of type `{type(obj)}` cannot be cast to `{t}`: {e}") from e
+
+
+class StencilLookupError(LookupError): ...

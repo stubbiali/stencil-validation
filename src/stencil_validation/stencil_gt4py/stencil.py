@@ -26,7 +26,7 @@ import ifs_physics_common
 
 from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
-from stencil_validation.utils import cast
+from stencil_validation.utils import StencilLookupError, cast
 
 if TYPE_CHECKING:
     from types import FunctionType
@@ -160,7 +160,9 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 def get_gt4py_stencil(
     name: str, version: str, config: Config, externals: dict | None = None
 ) -> GT4PyStencil:
-    return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]
+    if (key := get_stencil_id(name, version)) not in GT4PY_STENCIL_COLLECTION:
+        raise StencilLookupError(f"No GT4Py stencil found with {name=} and {version=}.")
+    return GT4PY_STENCIL_COLLECTION[key](config, externals)  # type: ignore[no-any-return]
 
 
 def print_gt4py_stencil_list() -> None:
