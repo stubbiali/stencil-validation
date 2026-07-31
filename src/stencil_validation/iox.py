@@ -168,15 +168,15 @@ class NetCDFOperator(IOFileOperator):
         if name not in self.ds.variables:
             return None
         else:
+            if (out := np.asarray(self.ds[name])).dtype.kind == "S":
+                return out
+
             if (
                 units is not None
                 and (ds_units := getattr(self.ds[name], "units", None)) is not None
             ):
                 factor = get_conversion_factor(ds_units, units)
-            else:
-                factor = 1.0
-
-            out = factor * np.asarray(self.ds[name])
+                out *= out.dtype.type(factor)
 
             if dims is not None:
                 if out.ndim != len(dims):
