@@ -26,7 +26,7 @@ import ifs_physics_common
 
 from stencil_validation.descriptors import concretize
 from stencil_validation.stencil import MetaStencil, Stencil, get_stencil_id, print_stencil_list
-from stencil_validation.utils import cast
+from stencil_validation.utils import StencilLookupError, cast
 
 if TYPE_CHECKING:
     from types import FunctionType
@@ -42,6 +42,12 @@ GT4PY_STENCIL_COLLECTION: dict[str, "MetaGT4PyStencil"] = {}
 
 class MetaGT4PyStencil(MetaStencil):
     COLLECTION: dict[str, MetaGT4PyStencil] = GT4PY_STENCIL_COLLECTION
+
+    def __new__(cls, cls_name: str, bases: tuple[type, ...], dct: dict) -> type:
+        if "name" in dct and "version" in dct and "def_func" in dct:
+            stencil_id = get_stencil_id(dct["name"], dct["version"])
+            ifs_physics_common.stencil_collection(stencil_id)(dct["def_func"])
+        return super().__new__(cls, cls_name, bases, dct)
 
 
 @dataclasses.dataclass
@@ -73,10 +79,8 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
                 else:
                     raise RuntimeError(f"No value specified for external symbol `{ext_name}`.")
 
-        stencil_id = get_stencil_id(self.name, self.version)
-        ifs_physics_common.stencil_collection(stencil_id)(self.def_func.__func__)
         self.stencil_obj = ifs_physics_common.compile_stencil(
-            stencil_id, self.config.gt4py_config, self.externals
+            get_stencil_id(self.name, self.version), self.config.gt4py_config, self.externals
         )
 
     @property
@@ -156,7 +160,9 @@ class GT4PyStencil(Stencil, metaclass=MetaGT4PyStencil):
 def get_gt4py_stencil(
     name: str, version: str, config: Config, externals: dict | None = None
 ) -> GT4PyStencil:
-    return GT4PY_STENCIL_COLLECTION[get_stencil_id(name, version)](config, externals)  # type: ignore[no-any-return]
+    if (key := get_stencil_id(name, version)) not in GT4PY_STENCIL_COLLECTION:
+        raise StencilLookupError(f"No GT4Py stencil found with {name=} and {version=}.")
+    return GT4PY_STENCIL_COLLECTION[key](config, externals)  # type: ignore[no-any-return]
 
 
 def print_gt4py_stencil_list() -> None:
