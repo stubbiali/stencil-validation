@@ -43,6 +43,7 @@ def run(
     out_file_path: str | None,
     externals: dict,
     backend: str,
+    compile_only: bool,
     enable_checks: bool,
     num_runs: int | None,
     verbose: bool,
@@ -63,9 +64,9 @@ def run(
     if print_stencil_list:
         print_gt4py_stencil_list()
     else:
-        get_gt4py_stencil(name, version, config, externals=externals)(
-            in_file_paths, write_in_file_path, out_file_path, num_runs=num_runs
-        )
+        stencil = get_gt4py_stencil(name, version, config, externals=externals)
+        if not compile_only:
+            stencil(in_file_paths, write_in_file_path, out_file_path, num_runs=num_runs)
 
 
 @click.command()
@@ -82,6 +83,7 @@ def run(
 @click.option("-o", "--output-file", type=str)
 @click.option("-e", "--external", "externals", type=(str, str), multiple=True)
 @click.option("--backend", type=str, default="numpy")
+@click.option("--compile-only", is_flag=True, default=False)
 @click.option("--enable-checks/--disable-checks", is_flag=True, default=False)
 @click.option("--num-runs", type=int, default=0)
 @click.option("--verbose", is_flag=True, default=False)
@@ -100,6 +102,7 @@ def main(
     output_file: str,
     externals: tuple[tuple[str, str], ...],
     backend: str,
+    compile_only: bool,
     enable_checks: bool,
     num_runs: int,
     verbose: bool,
@@ -117,6 +120,7 @@ def main(
         out_file_path=output_file,
         externals=dict(externals),
         backend=backend,
+        compile_only=compile_only,
         enable_checks=enable_checks,
         num_runs=num_runs,
         verbose=verbose,
